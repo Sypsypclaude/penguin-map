@@ -1,0 +1,16 @@
+{
+  "name": "ペンギンマップ",
+  "short_name": "ペンギンマップ",
+  "description": "日本でペンギンに会える水族館・動物園の地図と、行ったところの記録",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f2a44",
+  "theme_color": "#0f2a44",
+  "lang": "ja",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

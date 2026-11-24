@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0f2a44"/>
+  <circle cx="256" cy="560" r="300" fill="#1f6feb" opacity=".35"/>
+  <!-- body -->
+  <ellipse cx="256" cy="300" rx="128" ry="160" fill="#14181f"/>
+  <!-- belly -->
+  <ellipse cx="256" cy="330" rx="88" ry="124" fill="#ffffff"/>
+  <!-- head -->
+  <circle cx="256" cy="176" r="92" fill="#14181f"/>
+  <!-- face -->
+  <ellipse cx="226" cy="186" rx="34" ry="40" fill="#ffffff"/>
+  <ellipse cx="286" cy="186" rx="34" ry="40" fill="#ffffff"/>
+  <circle cx="232" cy="184" r="12" fill="#14181f"/>
+  <circle cx="280" cy="184" r="12" fill="#14181f"/>
+  <circle cx="236" cy="180" r="4" fill="#ffffff"/>
+  <circle cx="284" cy="180" r="4" fill="#ffffff"/>
+  <!-- beak -->
+  <path d="M236 218 L276 218 L256 246 Z" fill="#f5a524"/>
+  <!-- flippers -->
+  <path d="M132 260 Q96 340 124 390 Q150 330 160 290 Z" fill="#14181f"/>
+  <path d="M380 260 Q416 340 388 390 Q362 330 352 290 Z" fill="#14181f"/>
+  <!-- feet -->
+  <ellipse cx="214" cy="458" rx="40" ry="16" fill="#f5a524"/>
+  <ellipse cx="298" cy="458" rx="40" ry="16" fill="#f5a524"/>
+  <!-- map pin -->
+  <g transform="translate(372 74)">
+    <path d="M0 0 C-36 0 -54 26 -54 50 C-54 84 0 128 0 128 C0 128 54 84 54 50 C54 26 36 0 0 0 Z" fill="#e8590c" stroke="#fff" stroke-width="8"/>
+    <circle cx="0" cy="50" r="18" fill="#fff"/>
+  </g>
+</svg>
