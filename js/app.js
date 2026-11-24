@@ -10,9 +10,19 @@
   // ---- 保存データ（このブラウザの localStorage） ----
   let store = {};
   try { store = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { store = {}; }
-  const rec = f => store[f.name] || {};
+  // 行った記録は日付のリスト（visits）。古い形式（visited と date が1つ）からも読み替える
+  const today = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+  function normalize(r) {
+    if (!r) return r;
+    if (!Array.isArray(r.visits)) { r.visits = r.visited ? [r.date || ""] : []; delete r.date; }
+    r.visits.sort((a, b) => (b || "").localeCompare(a || ""));
+    r.visited = r.visits.length > 0;
+    return r;
+  }
+  for (const k of Object.keys(store)) normalize(store[k]);
+  const rec = f => store[f.name] || { visits: [], visited: false };
   const save = (f, patch) => {
-    store[f.name] = { ...rec(f), ...patch };
+    store[f.name] = normalize({ ...rec(f), ...patch });
     localStorage.setItem(KEY, JSON.stringify(store));
     refreshMarkers(); renderStats(); if (!$("#list").hidden) renderList();
   };
@@ -226,7 +236,7 @@
   const iconFor = f => {
     const r = rec(f);
     return L.divIcon({ className: "", iconSize: [34, 34], iconAnchor: [17, 17],
-      html: `<div class="pin ${r.visited ? "visited" : ""}">${PENGUIN_SVG}${r.visited ? '<i class="ck">✓</i>' : ""}</div>` });
+      html: `<div class="pin ${r.visited ? "visited" : ""}">${PENGUIN_SVG}${r.visited ? `<i class="ck">${r.visits.length > 1 ? r.visits.length : "✓"}</i>` : ""}</div>` });
   };
   FAC.forEach(f => {
     if (f.lat == null) return;
@@ -308,7 +318,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 なめらか移動）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 行った回数と日付）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -376,13 +386,12 @@
   let sheetPref = null;
 
   // 県へ移動：ふわっと動かし、県のまわりに余白（画面の約15%）を残す
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function goToPref(p, cover) {
     const size = map.getSize();
     const pad = L.point(Math.max(40, size.x * .15), Math.max(40, size.y * .15));
     const opts = { paddingTopLeft: pad, paddingBottomRight: cover ? pad.add(cover) : pad, maxZoom: 11 };
-    if (reduceMotion) map.fitBounds(prefView(p), opts);
-    else map.flyToBounds(prefView(p), { ...opts, duration: 1.1, easeLinearity: 0.2 });
+    // どの端末設定でも、約1秒かけてなめらかに寄る
+    map.flyToBounds(prefView(p), { ...opts, duration: 1.1, easeLinearity: 0.2 });
   }
 
   // 県をタップ：1回目はその県の全体を真ん中に表示するだけ。同じ県をもう一度タップしたら一覧を開く
@@ -464,14 +473,18 @@
       </div>
 
       <div class="sec rate">
-        <h3>わたしの記録</h3>
+        <h3>記録</h3>
         <div class="row">
-          <button class="toggle-visit ${r.visited ? "on" : ""}" id="visitBtn">${r.visited ? "✓ 行った！" : "行った！"}</button>
+          <button class="toggle-visit ${r.visited ? "on" : ""}" id="visitBtn">＋ 行った！</button>
+          <span class="visit-count">${r.visited ? `<b>${r.visits.length}</b> 回` : "まだ行っていません"}</span>
           <span class="saved" id="saved">保存しました</span>
         </div>
         <div id="rateBody" ${r.visited ? "" : "hidden"}>
+          <ol class="visits" id="visits">${r.visits.map((d, i) => `
+            <li><span class="vn">${r.visits.length - i}回目</span>
+              <input type="date" data-i="${i}" value="${esc(d)}" aria-label="${r.visits.length - i}回目の日付">
+              <button class="vdel" data-i="${i}" aria-label="${r.visits.length - i}回目を消す">消す</button></li>`).join("")}</ol>
           <div class="row"><span>評価</span><div class="stars" id="stars">${[1,2,3,4,5].map(i => `<button data-v="${i}" class="${(r.stars || 0) >= i ? "on" : ""}" aria-label="${i}つ星">★</button>`).join("")}</div></div>
-          <div class="row"><label>訪問日 <input type="date" id="visitDate" value="${esc(r.date || "")}"></label></div>
           <textarea id="memo" placeholder="感想メモ（推しペンギン、混雑具合、おすすめの時間帯など）">${esc(r.memo || "")}</textarea>
         </div>
       </div>
@@ -488,18 +501,27 @@
 
     if (backPref) $("#backPref").onclick = () => openPref(backPref, false);
     const flash = () => { const s = $("#saved"); s.classList.add("show"); clearTimeout(flash.t); flash.t = setTimeout(() => s.classList.remove("show"), 1200); };
+    // 「＋ 行った！」は押すたびに今日の日付で1回分を追加（日付はあとから変えられる）
     $("#visitBtn").onclick = () => {
-      const v = !rec(f).visited;
-      save(f, { visited: v, date: v && !rec(f).date ? new Date().toISOString().slice(0, 10) : rec(f).date });
+      save(f, { visits: [today(), ...rec(f).visits] });
       openSheet(f, backPref); flash();
     };
+    $("#visits").querySelectorAll("input[type=date]").forEach(inp => inp.onchange = () => {
+      const v = [...rec(f).visits]; v[+inp.dataset.i] = inp.value;
+      save(f, { visits: v }); openSheet(f, backPref); flash();
+    });
+    // 消すときは、押したボタンが「本当に消す」に変わり、もう一度押すと消える
+    $("#visits").querySelectorAll(".vdel").forEach(b => b.onclick = () => {
+      if (!b.classList.contains("confirm")) { b.classList.add("confirm"); b.textContent = "本当に消す"; return; }
+      const v = [...rec(f).visits]; v.splice(+b.dataset.i, 1);
+      save(f, { visits: v }); openSheet(f, backPref); flash();
+    });
     $("#stars").querySelectorAll("button").forEach(b => b.onclick = () => {
       const v = +b.dataset.v, nv = rec(f).stars === v ? 0 : v;
       save(f, { stars: nv });
       $("#stars").querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.v <= nv));
       flash();
     });
-    $("#visitDate").onchange = e => { save(f, { date: e.target.value }); flash(); };
     let t; $("#memo").oninput = e => { clearTimeout(t); t = setTimeout(() => { save(f, { memo: e.target.value }); flash(); }, 400); };
     $("#sheetBody").querySelectorAll(".spi").forEach(b => {
       const img = b.querySelector("img");
