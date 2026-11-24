@@ -62,15 +62,20 @@ main{flex:1;position:relative;min-height:0;display:flex}
 
 .leaflet-prefs-pane path{cursor:pointer}
 
+/* アクセス */
+.acc-row{display:grid;grid-template-columns:5.5em 1fr;gap:8px;font-size:13px;line-height:1.55;padding:3px 0}
+.acc-k{color:var(--sub);font-size:12px;padding-top:1px}
+.acc .route{margin-top:8px}
+.acc .note a{color:var(--accent)}
 /* 施設シートの種類（横並び） */
-.sp-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity}
-.spi{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;padding:0;color:inherit;scroll-snap-align:start}
-.spi img{width:68px;height:68px;border-radius:50%;object-fit:cover;background:var(--chip);border:2px solid var(--line)}
+.sp-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 8px;padding:2px 0 6px}
+.spi{min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;padding:0;color:inherit;scroll-snap-align:start}
+.spi img{width:100%;max-width:72px;aspect-ratio:1;height:auto;border-radius:50%;object-fit:cover;background:var(--chip);border:2px solid var(--line)}
 .spi span{font-size:11px;line-height:1.25;text-align:center;font-weight:600}
 .spi:active img,.spi:hover img{border-color:var(--accent)}
 /* 種類の説明ポップアップ */
 .lightbox .sp-pop{position:relative;background:#fff;color:var(--ink);border-radius:16px;width:min(360px,100%);max-height:88vh;overflow-y:auto;cursor:auto;box-shadow:0 10px 40px rgba(0,0,0,.4)}
-.lightbox .sp-pop>img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:0;max-height:none}
+.lightbox .sp-pop>img{display:block;width:100%;height:auto;max-height:55vh;object-fit:contain;background:#1b2430;border-radius:0}
 .pop-body{padding:14px 16px 16px}
 .pop-body .t{font-weight:700;font-size:17px}
 .pop-body .s{font-size:12px;color:var(--sub);margin-top:2px}

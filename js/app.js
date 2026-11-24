@@ -191,7 +191,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 ピン・色分け改善）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 アクセス情報）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -217,10 +217,15 @@
 
   // ---- 詳細シート ----
   const sheet = $("#sheet");
-  $("#sheetClose").onclick = closeSheet;
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#lightbox").hidden) $("#lightbox").hidden = true; else closeSheet(); } });
-  map.on("click", closeSheet);
-  function closeSheet() { sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true"); }
+  $("#sheetClose").onclick = () => closeSheet(true);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#lightbox").hidden) $("#lightbox").hidden = true; else closeSheet(true); } });
+  map.on("click", () => closeSheet(false));
+  // ×で閉じたときは、見ていた県の全体を地図の真ん中にぴったり表示する
+  function closeSheet(backToPref) {
+    const wasOpen = sheet.classList.contains("open");
+    sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true");
+    if (backToPref && wasOpen && sheetPref) map.fitBounds(prefView(sheetPref), { padding: [16, 16] });
+  }
 
   const spShort = k => SP[k].ja.replace(/（.*）/, "").replace(/ペンギン$/, "");
   function openSpecies(k, f) {
@@ -244,14 +249,20 @@
     lb.onclick = e => { if (e.target === lb || e.target.closest(".pop-close")) lb.hidden = true; };
   }
 
+  // 県全体が収まる範囲。東京（小笠原など）のように島が遠い県は、施設のある範囲に合わせる
+  function prefView(p) {
+    const pb = prefBounds[p], fs = FAC.filter(f => f.pref === p && f.lat != null);
+    if (pb && pb.getNorthEast().distanceTo(pb.getSouthWest()) <= 600000) return pb;
+    return fs.length ? L.latLngBounds(fs.map(f => [f.lat, f.lng])).pad(0.6) : pb;
+  }
+  // 今シートで見ている県（×で閉じたら、この県の全体に戻す）
+  let sheetPref = null;
+
   // 県のシート：県内の施設一覧と、県内で会える種類
   function openPref(p, zoom) {
+    sheetPref = p;
     if (zoom && prefBounds[p]) {
-      const fs = FAC.filter(f => f.pref === p && f.lat != null);
-      // 東京（小笠原など）のように島が遠い県は、施設のある範囲に合わせる
-      const b = fs.length ? L.latLngBounds(fs.map(f => [f.lat, f.lng])).pad(0.6) : prefBounds[p];
-      map.fitBounds(prefBounds[p].getNorthEast().distanceTo(prefBounds[p].getSouthWest()) > 600000 ? b : prefBounds[p],
-        { maxZoom: 10, paddingBottomRight: window.innerWidth > 720 ? [440, 0] : [0, window.innerHeight * 0.5] });
+      map.fitBounds(prefView(p), { maxZoom: 10, paddingBottomRight: window.innerWidth > 720 ? [440, 0] : [0, window.innerHeight * 0.5] });
     }
     const all = FAC.filter(f => f.pref === p);
     const shown = all.filter(matches);
@@ -290,6 +301,7 @@
   }
 
   function openSheet(f, backPref) {
+    sheetPref = backPref || null;
     const r = rec(f);
     const sps = [...f.species].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     $("#sheetBody").innerHTML = `
@@ -301,9 +313,18 @@
         ${f.note ? `<div class="addr" style="color:#c92a2a;margin-top:4px">⚠ ${esc(f.note)}</div>` : ""}
       </div>
       <div class="links">
-        <a class="btn primary" href="${esc(f.url)}" target="_blank" rel="noopener">${f.urlIsSearch ? "公式サイトを検索" : "公式サイト"} ↗</a>
-        <a class="btn" href="${gMap(f)}" target="_blank" rel="noopener">Googleマップ ↗</a>
-        <a class="btn" href="${gImg(f.name + " ペンギン")}" target="_blank" rel="noopener">この施設のペンギン写真 ↗</a>
+        <a class="btn primary" href="${esc(f.url)}" target="_blank" rel="noopener">公式 ↗</a>
+        <a class="btn" href="${gMap(f)}" target="_blank" rel="noopener">Google ↗</a>
+        <a class="btn" href="${gImg(f.name + " ペンギン")}" target="_blank" rel="noopener">ペンギン写真 ↗</a>
+      </div>
+
+      <div class="sec acc">
+        <h3>アクセス</h3>
+        ${f.access?.train ? `<div class="acc-row"><span class="acc-k">電車・バス</span><span>${esc(f.access.train)}</span></div>` : ""}
+        ${f.access?.car ? `<div class="acc-row"><span class="acc-k">車</span><span>${esc(f.access.car)}</span></div>` : ""}
+        ${f.access?.train || f.access?.car ? "" : `<p class="note">公式サイトでアクセス方法を確認してください。</p>`}
+        <a class="btn route" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.name + " " + f.pref)}" target="_blank" rel="noopener">現在地からの経路 ↗</a>
+        ${f.access?.src ? `<p class="note">出典：<a href="${esc(f.access.src)}" target="_blank" rel="noopener">公式サイトのアクセス案内</a>（2026年11月時点）</p>` : ""}
       </div>
 
       <div class="sec rate">
