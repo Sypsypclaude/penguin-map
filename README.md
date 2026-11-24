@@ -12,7 +12,12 @@
 
 記録はこのブラウザの localStorage に保存される（別の端末とは同期しない）。
 
-## 起動
+## 公開中のページ（iPhoneのホーム画面に追加して使う）
+https://sypsypclaude.github.io/penguin-map/ （GitHub Pages・誰でも見られる公開ページ。記録は各端末の中だけ）
+
+更新するとき：ファイルを直したら `sw.js` の `VERSION` を1つ上げてから commit → `git push`。1〜2分で反映され、iPhoneではアプリを開き直すと新しい版になる。
+
+## 起動（PCで試す）
 ```
 npx http-server penguin-list -p 8765
 ```
