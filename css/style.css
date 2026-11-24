@@ -47,6 +47,33 @@ main{flex:1;position:relative;min-height:0;display:flex}
 .pin.visited{background:var(--visited)}
 .clu{width:40px;height:40px;border-radius:50%;background:rgba(31,111,235,.9);border:3px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.3);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
 .clu.v{background:rgba(232,89,12,.92)}
+/* 県バッジ */
+.pb{display:inline-flex;align-items:center;gap:5px;transform:translate(-50%,-50%);white-space:nowrap;
+  background:#fff;color:#0f2a44;border:2px solid #0f2a44;border-radius:999px;padding:3px 9px 3px 10px;
+  font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer}
+.pb b{background:#0c8599;color:#fff;border-radius:999px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px}
+.pb.v{border-color:#e8590c}
+.pb.v b{background:#e8590c}
+.pb.mini{padding:2px;border-width:2px}
+.pb.mini{border-width:1.5px;padding:1px}
+.pb.mini b{min-width:17px;height:17px;font-size:10px;padding:0 4px}
+.pb b{background:#0c8599}
+.leaflet-prefs-pane path{cursor:pointer}
+
+/* 県シート */
+.back{border:none;background:none;color:var(--accent);font-size:14px;padding:14px 18px 0;font-weight:600}
+.sp-chips{display:flex;flex-wrap:wrap;gap:6px}
+.spc{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:3px 10px 3px 3px;font-size:12px}
+.spc img{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.pf{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:none;background:none;border-bottom:1px solid var(--line);padding:10px 0;color:inherit}
+.pf:last-child{border-bottom:none}
+.pf .dot{flex:none;width:10px;height:10px;border-radius:50%;background:#9aa5b1}
+.pf.visited .dot{background:var(--visited)}
+.pf-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.pf .nm{font-weight:600;font-size:14px}
+.pf .st{color:var(--star)}
+.pf .meta{font-size:12px;color:var(--sub);margin-top:2px}
+.pf .chev{color:var(--sub);font-size:20px}
 .leaflet-tooltip.tip{font-size:12px;padding:3px 7px}
 
 /* detail sheet */

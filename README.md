@@ -27,6 +27,7 @@ npx http-server penguin-list -p 8765
 - `index.html` / `css/style.css` / `js/app.js` … 本体（Leaflet + leaflet.markercluster を CDN から読み込む）
 - `data/facilities.js` … 施設データ（名前・都道府県・種類・公式URL・座標）
 - `data/species.js` … ペンギン12種の説明と写真の出典
+- `data/prefs.js` … 都道府県の境界線（出典：地球地図日本（国土地理院）。[dataofjapan/land](https://github.com/dataofjapan/land) の japan.geojson を mapshaper で 8% に簡略化）
 - `img/species/` … 種ごとの写真（Wikimedia Commons、CC BY-SA など。出典は species.js の `credit`）
 
 ## データについて（要注意）

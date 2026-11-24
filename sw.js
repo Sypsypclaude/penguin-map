@@ -1,12 +1,12 @@
 // オフラインでもアプリ画面が開けるようにするキャッシュ。
 // アプリのファイルを変えたら VERSION を上げる（古いキャッシュが消えて新しい版になる）。
-const VERSION = "v2";
+const VERSION = "v3";
 const APP = `app-${VERSION}`;
 const TILES = "tiles"; // 一度表示した地図タイル（上限あり）
 const TILE_LIMIT = 1500;
 
 const APP_FILES = [
-  "./", "index.html", "css/style.css", "js/app.js", "data/species.js", "data/facilities.js",
+  "./", "index.html", "css/style.css", "js/app.js", "data/species.js", "data/facilities.js", "data/prefs.js",
   "manifest.webmanifest", "img/icon-180.png", "img/icon-192.png", "img/icon-512.png",
   ...["emperor","king","adelie","gentoo","chinstrap","macaroni","srock","nrock","humboldt","magellanic","african","little"].map(k => `img/species/${k}.jpg`),
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",

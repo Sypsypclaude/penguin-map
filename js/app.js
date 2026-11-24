@@ -18,29 +18,92 @@
   };
 
   // ---- 地図 ----
-  const map = L.map("map", { zoomControl: true, minZoom: 4 }).setView([36.5, 137.5], 5);
+  const map = L.map("map", { zoomControl: true, minZoom: 4, zoomSnap: 0.5 }).fitBounds([[30.5, 129], [45.5, 145.5]]);
   const gsi = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
     maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
-  }).addTo(map);
+  });
   const pale = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   });
+  pale.addTo(map);
   const photo = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   });
   const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
-  L.control.layers({ "地理院 標準地図": gsi, "地理院 淡色地図": pale, "航空写真": photo, "OpenStreetMap": osm }, null, { position: "topright" }).addTo(map);
+  L.control.layers({ "地理院 淡色地図": pale, "地理院 標準地図": gsi, "航空写真": photo, "OpenStreetMap": osm }, null, { position: "topright" }).addTo(map);
+
+  // ---- 都道府県（境界線・色分け・件数バッジ） ----
+  // 引いて見ているときは「県ごと」、拡大すると施設ごとのピンに切り替える
+  const PREF_ZOOM = 8;
+  const shortPref = p => p === "北海道" ? p : p.replace(/[都府県]$/, "");
+  const prefStat = p => {
+    const fs = FAC.filter(f => f.pref === p && matches(f));
+    return { n: fs.length, v: fs.filter(f => rec(f).visited).length, fs };
+  };
+  map.createPane("prefs").style.zIndex = 350;
+  const prefLayer = L.geoJSON(window.PREFS, {
+    pane: "prefs",
+    style: () => ({}),
+    onEachFeature: (feat, layer) => {
+      layer.on("click", e => { L.DomEvent.stop(e); openPref(feat.properties.nam_ja, true); });
+    }
+  }).addTo(map);
+  const prefBounds = {};
+  prefLayer.eachLayer(l => { prefBounds[l.feature.properties.nam_ja] = l.getBounds(); });
+  function stylePrefs() {
+    const z = map.getZoom();
+    prefLayer.eachLayer(l => {
+      const { n, v } = prefStat(l.feature.properties.nam_ja);
+      l.setStyle({
+        color: "#0f2a44", weight: z < 6 ? 1.8 : z < PREF_ZOOM ? 2.6 : 3, opacity: 1,
+        fillColor: v ? "#e8590c" : n ? "#0c8599" : "#868e96",
+        fillOpacity: n ? (z < PREF_ZOOM ? .22 + Math.min(n, 9) * .04 : .06) : .12
+      });
+    });
+  }
+
+  // 県の件数バッジ（県内の施設の平均位置に置く）
+  const prefBadges = L.layerGroup();
+  function renderPrefBadges() {
+    prefBadges.clearLayers();
+    const showName = map.getZoom() >= 6;
+    for (const p of PREF_ORDER) {
+      const { n, v, fs } = prefStat(p);
+      const pts = fs.filter(f => f.lat != null);
+      if (!n || !pts.length) continue;
+      const lat = pts.reduce((s, f) => s + f.lat, 0) / pts.length, lng = pts.reduce((s, f) => s + f.lng, 0) / pts.length;
+      L.marker([lat, lng], {
+        icon: L.divIcon({ className: "", iconSize: null,
+          html: `<div class="pb ${v ? "v" : ""} ${showName ? "" : "mini"}">${showName ? `<span>${esc(shortPref(p))}</span>` : ""}<b>${n}</b></div>` }),
+        title: `${p}（${n}施設）`, keyboard: true
+      }).on("click", e => {
+        L.DomEvent.stop(e);
+        // 近くに他の県のバッジが重なっていたら、選び間違えないようにまず拡大する
+        const here = map.latLngToContainerPoint(e.latlng);
+        const crowded = prefBadges.getLayers().some(m => m !== e.target && map.latLngToContainerPoint(m.getLatLng()).distanceTo(here) < 34);
+        if (crowded && map.getZoom() < PREF_ZOOM - 1) map.setView(e.latlng, map.getZoom() + 2);
+        else openPref(p, true);
+      }).addTo(prefBadges);
+    }
+  }
+  function updateMode() {
+    const prefMode = map.getZoom() < PREF_ZOOM;
+    if (prefMode) { map.removeLayer(cluster); prefBadges.addTo(map); renderPrefBadges(); }
+    else { map.removeLayer(prefBadges); cluster.addTo(map); }
+    stylePrefs();
+  }
 
   const markers = new Map();
   const cluster = L.markerClusterGroup({
-    showCoverageOnHover: false, maxClusterRadius: 45, disableClusteringAtZoom: 10, spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false, maxClusterRadius: 35, disableClusteringAtZoom: 11, spiderfyOnMaxZoom: true,
     iconCreateFunction: c => {
       const n = c.getChildCount(), v = c.getAllChildMarkers().some(m => rec(m.options.fac).visited);
       return L.divIcon({ className: "", html: `<div class="clu ${v ? "v" : ""}">${n}</div>`, iconSize: [40, 40] });
     }
-  }).addTo(map);
+  });
+  map.on("zoomend", updateMode);
   const iconFor = f => {
     const r = rec(f), n = f.species.length;
     const cls = r.visited ? "visited" : n > 1 ? "multi" : "";
@@ -71,6 +134,8 @@
     const show = [];
     markers.forEach((m, f) => { m.setIcon(iconFor(f)); if (matches(f)) show.push(m); });
     cluster.clearLayers(); cluster.addLayers(show);
+    stylePrefs();
+    if (map.hasLayer(prefBadges)) renderPrefBadges();
   }
 
   const chips = $("#speciesChips");
@@ -102,7 +167,8 @@
   function renderStats() {
     const visited = FAC.filter(f => rec(f).visited);
     const seen = new Set(visited.flatMap(f => f.species));
-    $("#stats").innerHTML = `<span class="wide">全<b>${FAC.length}</b>施設・<b>${ORDER.length}</b>種　｜　</span>行った <b>${visited.length}</b> 施設・会えた <b>${seen.size}</b>/${ORDER.length} 種`;
+    const prefs = new Set(FAC.map(f => f.pref)), vPrefs = new Set(visited.map(f => f.pref));
+    $("#stats").innerHTML = `<span class="wide">全<b>${FAC.length}</b>施設・<b>${ORDER.length}</b>種　｜　</span>行った <b>${visited.length}</b> 施設・<b>${vPrefs.size}</b>/${prefs.size} 県・会えた <b>${seen.size}</b>/${ORDER.length} 種`;
   }
 
   // ---- 一覧 ----
@@ -153,10 +219,55 @@
   map.on("click", closeSheet);
   function closeSheet() { sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true"); }
 
-  function openSheet(f) {
+  // 県のシート：県内の施設一覧と、県内で会える種類
+  function openPref(p, zoom) {
+    if (zoom && prefBounds[p]) {
+      const fs = FAC.filter(f => f.pref === p && f.lat != null);
+      // 東京（小笠原など）のように島が遠い県は、施設のある範囲に合わせる
+      const b = fs.length ? L.latLngBounds(fs.map(f => [f.lat, f.lng])).pad(0.6) : prefBounds[p];
+      map.fitBounds(prefBounds[p].getNorthEast().distanceTo(prefBounds[p].getSouthWest()) > 600000 ? b : prefBounds[p],
+        { maxZoom: 10, paddingBottomRight: window.innerWidth > 720 ? [440, 0] : [0, window.innerHeight * 0.5] });
+    }
+    const all = FAC.filter(f => f.pref === p);
+    const shown = all.filter(matches);
+    const sps = ORDER.filter(k => all.some(f => f.species.includes(k)));
+    const v = all.filter(f => rec(f).visited).length;
+    $("#sheetBody").innerHTML = `
+      <div class="sh-head">
+        <div class="type">都道府県</div>
+        <h2>${esc(p)}</h2>
+        <div class="addr">ペンギンに会える施設 ${all.length} か所・行った ${v} か所</div>
+      </div>
+      <div class="sec">
+        <h3>${esc(shortPref(p))}で会えるペンギン（${sps.length}種）</h3>
+        <div class="sp-chips">${sps.map(k => `<span class="spc"><img src="${esc(SP[k].img)}" alt="">${esc(SP[k].ja.replace(/（.*）/, ""))}</span>`).join("")}</div>
+      </div>
+      <div class="sec">
+        <h3>施設（${shown.length}${shown.length !== all.length ? ` / 全${all.length}` : ""}）</h3>
+        ${shown.length ? "" : `<p class="note">今の絞り込みに合う施設はありません。</p>`}
+        ${shown.map(f => { const r = rec(f); return `
+          <button class="pf ${r.visited ? "visited" : ""}" data-name="${esc(f.name)}">
+            <span class="dot"></span>
+            <span class="pf-main">
+              <span class="nm">${esc(f.name)}${r.stars ? ` <span class="st">${"★".repeat(r.stars)}</span>` : ""}</span>
+              <span class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</span>
+            </span>
+            <span class="chev">›</span>
+          </button>`; }).join("")}
+      </div>`;
+    $("#sheetBody").querySelectorAll(".pf").forEach(el => el.onclick = () => {
+      const f = FAC.find(x => x.name === el.dataset.name);
+      if (f.lat != null) map.setView([f.lat, f.lng], Math.max(map.getZoom(), 13));
+      openSheet(f, p);
+    });
+    sheet.classList.add("open"); sheet.setAttribute("aria-hidden", "false"); sheet.scrollTop = 0;
+  }
+
+  function openSheet(f, backPref) {
     const r = rec(f);
     const sps = [...f.species].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
     $("#sheetBody").innerHTML = `
+      ${backPref ? `<button class="back" id="backPref">‹ ${esc(backPref)}の一覧</button>` : ""}
       <div class="sh-head">
         <div class="type">${esc(f.pref)}・${esc(f.type)}</div>
         <h2>${esc(f.name)}</h2>
@@ -201,11 +312,12 @@
         <p class="note">写真：Wikimedia Commons（各写真をタップすると出典）。飼育種は変わることがあるので、お出かけ前に公式サイトで確認してください。</p>
       </div>`;
 
+    if (backPref) $("#backPref").onclick = () => openPref(backPref, false);
     const flash = () => { const s = $("#saved"); s.classList.add("show"); clearTimeout(flash.t); flash.t = setTimeout(() => s.classList.remove("show"), 1200); };
     $("#visitBtn").onclick = () => {
       const v = !rec(f).visited;
       save(f, { visited: v, date: v && !rec(f).date ? new Date().toISOString().slice(0, 10) : rec(f).date });
-      openSheet(f); flash();
+      openSheet(f, backPref); flash();
     };
     $("#stars").querySelectorAll("button").forEach(b => b.onclick = () => {
       const v = +b.dataset.v, nv = rec(f).stars === v ? 0 : v;
@@ -226,5 +338,5 @@
     sheet.classList.add("open"); sheet.setAttribute("aria-hidden", "false"); sheet.scrollTop = 0;
   }
 
-  refreshMarkers(); renderStats();
+  refreshMarkers(); renderStats(); updateMode();
 })();
