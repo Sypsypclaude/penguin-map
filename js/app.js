@@ -308,7 +308,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 県タップで移動）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 なめらか移動）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -341,7 +341,7 @@
   function closeSheet(backToPref) {
     const wasOpen = sheet.classList.contains("open");
     sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true");
-    if (backToPref && wasOpen && sheetPref) map.fitBounds(prefView(sheetPref), { padding: [16, 16] });
+    if (backToPref && wasOpen && sheetPref) goToPref(sheetPref);
   }
 
   const spShort = k => SP[k].ja.replace(/（.*）/, "").replace(/ペンギン$/, "");
@@ -375,12 +375,22 @@
   // 今シートで見ている県（×で閉じたら、この県の全体に戻す）
   let sheetPref = null;
 
+  // 県へ移動：ふわっと動かし、県のまわりに余白（画面の約15%）を残す
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function goToPref(p, cover) {
+    const size = map.getSize();
+    const pad = L.point(Math.max(40, size.x * .15), Math.max(40, size.y * .15));
+    const opts = { paddingTopLeft: pad, paddingBottomRight: cover ? pad.add(cover) : pad, maxZoom: 11 };
+    if (reduceMotion) map.fitBounds(prefView(p), opts);
+    else map.flyToBounds(prefView(p), { ...opts, duration: 1.1, easeLinearity: 0.2 });
+  }
+
   // 県をタップ：1回目はその県の全体を真ん中に表示するだけ。同じ県をもう一度タップしたら一覧を開く
   let focusedPref = null;
   function tapPref(p) {
     if (focusedPref === p) { openPref(p, false); return; }
     focusedPref = p;
-    map.fitBounds(prefView(p), { padding: [16, 16] });
+    goToPref(p);
   }
   map.on("dragstart", () => { focusedPref = null; });
 
@@ -388,7 +398,7 @@
   function openPref(p, zoom) {
     sheetPref = p;
     if (zoom && prefBounds[p]) {
-      map.fitBounds(prefView(p), { maxZoom: 10, paddingBottomRight: window.innerWidth > 720 ? [440, 0] : [0, window.innerHeight * 0.5] });
+      goToPref(p, window.innerWidth > 720 ? [440, 0] : [0, window.innerHeight * 0.5]);
     }
     const all = FAC.filter(f => f.pref === p);
     const shown = all.filter(matches);
