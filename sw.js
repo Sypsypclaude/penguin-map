@@ -1,6 +1,6 @@
 // オフラインでもアプリ画面が開けるようにするキャッシュ。
 // アプリのファイルを変えたら VERSION を上げる（古いキャッシュが消えて新しい版になる）。
-const VERSION = "v3";
+const VERSION = "v4";
 const APP = `app-${VERSION}`;
 const TILES = "tiles"; // 一度表示した地図タイル（上限あり）
 const TILE_LIMIT = 1500;
@@ -50,7 +50,9 @@ self.addEventListener("fetch", e => {
 
   // アプリ本体: ネット優先（更新がすぐ届く）、オフラインならキャッシュ
   if (url.origin === location.origin || url.host === "unpkg.com") {
-    e.respondWith(fetch(req).then(res => {
+    // GitHub Pages は10分キャッシュさせるので、毎回サーバーに更新を確かめる（no-cache）
+    const fresh = url.origin === location.origin ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req);
+    e.respondWith(fresh.then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(APP).then(c => c.put(req, copy)); }
       return res;
     }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match("index.html"))));
