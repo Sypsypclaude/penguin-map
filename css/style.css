@@ -1,6 +1,6 @@
 :root{
   --ink:#1b2430; --sub:#5b6675; --line:#e3e7ec; --bg:#f6f8fa; --card:#fff;
-  --accent:#1f6feb; --visited:#e8590c; --star:#f5a524; --chip:#eef2f6;
+  --accent:#1f6feb; --visited:#1c5bd6; --star:#f5a524; --chip:#eef2f6;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic UI",sans-serif;color:var(--ink);background:var(--bg)}
@@ -41,29 +41,47 @@ main{flex:1;position:relative;min-height:0;display:flex}
 .pref-head{position:sticky;top:0;background:var(--bg);font-size:12px;font-weight:700;color:var(--sub);padding:4px 14px;border-bottom:1px solid var(--line)}
 
 /* markers */
-.pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0f2a44;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
-.pin span{transform:rotate(45deg);color:#fff;font-size:13px;font-weight:700}
-.pin.multi{background:var(--accent)}
-.pin.visited{background:var(--visited)}
-.clu{width:40px;height:40px;border-radius:50%;background:rgba(31,111,235,.9);border:3px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.3);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
-.clu.v{background:rgba(232,89,12,.92)}
+/* 施設のピン（ペンギン）と、まとめ表示（○か所） */
+.pin{position:relative;width:34px;height:34px;border-radius:50%;background:#fff;border:2.5px solid #1c5bd6;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+.pin svg{width:24px;height:24px}
+.pin.visited{background:#1c5bd6;border-color:#fff}
+.pin .ck{position:absolute;right:-5px;bottom:-4px;width:16px;height:16px;border-radius:50%;background:#fff;color:#1c5bd6;font-style:normal;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.clu{display:inline-flex;align-items:baseline;gap:1px;transform:translate(-50%,-50%);white-space:nowrap;background:#0f2a44;color:#fff;border:2px solid #fff;border-radius:999px;padding:4px 10px;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.clu b{font-size:15px}
+.clu.v{background:#1c5bd6}
 /* 県バッジ */
 .pb{display:inline-flex;align-items:center;gap:5px;transform:translate(-50%,-50%);white-space:nowrap;
   background:#fff;color:#0f2a44;border:2px solid #0f2a44;border-radius:999px;padding:3px 9px 3px 10px;
   font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer}
-.pb b{background:#0c8599;color:#fff;border-radius:999px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px}
-.pb.v{border-color:#e8590c}
-.pb.v b{background:#e8590c}
+.pb b{background:#74c0fc;color:#0f2a44;border-radius:999px;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;padding:0 6px}
+.pb.v{border-color:#1c5bd6}
+.pb.v b{background:#1c5bd6;color:#fff}
 .pb.mini{padding:2px;border-width:2px}
 .pb.mini{border-width:1.5px;padding:1px}
 .pb.mini b{min-width:17px;height:17px;font-size:10px;padding:0 4px}
-.pb b{background:#0c8599}
+
 .leaflet-prefs-pane path{cursor:pointer}
 
+/* 施設シートの種類（横並び） */
+.sp-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity}
+.spi{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:none;padding:0;color:inherit;scroll-snap-align:start}
+.spi img{width:68px;height:68px;border-radius:50%;object-fit:cover;background:var(--chip);border:2px solid var(--line)}
+.spi span{font-size:11px;line-height:1.25;text-align:center;font-weight:600}
+.spi:active img,.spi:hover img{border-color:var(--accent)}
+/* 種類の説明ポップアップ */
+.lightbox .sp-pop{position:relative;background:#fff;color:var(--ink);border-radius:16px;width:min(360px,100%);max-height:88vh;overflow-y:auto;cursor:auto;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.lightbox .sp-pop>img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:0;max-height:none}
+.pop-body{padding:14px 16px 16px}
+.pop-body .t{font-weight:700;font-size:17px}
+.pop-body .s{font-size:12px;color:var(--sub);margin-top:2px}
+.pop-body p{font-size:14px;line-height:1.6;margin:10px 0}
+.pop-body .ext{display:flex;flex-wrap:wrap;gap:12px;font-size:13px}
+.pop-body .ext a{color:var(--accent)}
+.pop-close{position:absolute;top:8px;right:8px;border:none;background:#0008;color:#fff;width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;z-index:1}
 /* 県シート */
 .back{border:none;background:none;color:var(--accent);font-size:14px;padding:14px 18px 0;font-weight:600}
 .sp-chips{display:flex;flex-wrap:wrap;gap:6px}
-.spc{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:3px 10px 3px 3px;font-size:12px}
+.spc{border:none;color:inherit;font:inherit;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:3px 10px 3px 3px;font-size:12px}
 .spc img{width:26px;height:26px;border-radius:50%;object-fit:cover}
 .pf{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:none;background:none;border-bottom:1px solid var(--line);padding:10px 0;color:inherit}
 .pf:last-child{border-bottom:none}

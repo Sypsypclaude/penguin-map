@@ -58,8 +58,9 @@
       const { n, v } = prefStat(l.feature.properties.nam_ja);
       l.setStyle({
         color: "#0f2a44", weight: z < 6 ? 1.8 : z < PREF_ZOOM ? 2.6 : 3, opacity: 1,
-        fillColor: v ? "#e8590c" : n ? "#0c8599" : "#868e96",
-        fillOpacity: n ? (z < PREF_ZOOM ? .22 + Math.min(n, 9) * .04 : .06) : .12
+        // 行った県＝濃い青、まだの県＝薄い青、施設のない県＝灰色
+        fillColor: v ? "#1c5bd6" : n ? "#74c0fc" : "#adb5bd",
+        fillOpacity: z < PREF_ZOOM ? (v ? .5 : n ? .3 : .15) : (v ? .14 : n ? .08 : .06)
       });
     });
   }
@@ -100,19 +101,21 @@
     showCoverageOnHover: false, maxClusterRadius: 35, disableClusteringAtZoom: 11, spiderfyOnMaxZoom: true,
     iconCreateFunction: c => {
       const n = c.getChildCount(), v = c.getAllChildMarkers().some(m => rec(m.options.fac).visited);
-      return L.divIcon({ className: "", html: `<div class="clu ${v ? "v" : ""}">${n}</div>`, iconSize: [40, 40] });
+      return L.divIcon({ className: "", html: `<div class="clu ${v ? "v" : ""}"><b>${n}</b>か所</div>`, iconSize: null });
     }
   });
   map.on("zoomend", updateMode);
+  // 施設1か所のピン。行った施設は青く塗って✓
+  const PENGUIN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="13.5" rx="7" ry="9" fill="#14181f"/><ellipse cx="12" cy="15" rx="4.6" ry="6.6" fill="#fff"/><circle cx="12" cy="7.5" r="5" fill="#14181f"/><ellipse cx="10.3" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><ellipse cx="13.7" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><circle cx="10.5" cy="7.8" r=".8" fill="#14181f"/><circle cx="13.5" cy="7.8" r=".8" fill="#14181f"/><path d="M10.9 9.6h2.2L12 11.2z" fill="#f5a524"/></svg>';
   const iconFor = f => {
-    const r = rec(f), n = f.species.length;
-    const cls = r.visited ? "visited" : n > 1 ? "multi" : "";
-    return L.divIcon({ className: "", html: `<div class="pin ${cls}"><span>${r.visited && r.stars ? "★" + r.stars : n}</span></div>`, iconSize: [34, 34], iconAnchor: [17, 34] });
+    const r = rec(f);
+    return L.divIcon({ className: "", iconSize: [34, 34], iconAnchor: [17, 17],
+      html: `<div class="pin ${r.visited ? "visited" : ""}">${PENGUIN_SVG}${r.visited ? '<i class="ck">✓</i>' : ""}</div>` });
   };
   FAC.forEach(f => {
     if (f.lat == null) return;
     const m = L.marker([f.lat, f.lng], { icon: iconFor(f), title: f.name, fac: f })
-      .bindTooltip(`${esc(f.name)}（${f.species.length}種）`, { className: "tip", direction: "top", offset: [0, -30] })
+      .bindTooltip(`${esc(f.name)}`, { className: "tip", direction: "top", offset: [0, -16] })
       .on("click", () => openSheet(f));
     markers.set(f, m);
   });
@@ -188,7 +191,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 県表示）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 ピン・色分け改善）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -219,6 +222,28 @@
   map.on("click", closeSheet);
   function closeSheet() { sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true"); }
 
+  const spShort = k => SP[k].ja.replace(/（.*）/, "").replace(/ペンギン$/, "");
+  function openSpecies(k, f) {
+    const s = SP[k], lb = $("#lightbox"), name = s.ja.replace(/（.*）/, "");
+    lb.innerHTML = `
+      <div class="sp-pop" role="dialog" aria-modal="true" aria-label="${esc(s.ja)}">
+        <button class="pop-close" aria-label="閉じる">×</button>
+        <img src="${esc(s.img)}" alt="${esc(s.ja)}">
+        <div class="pop-body">
+          <div class="t">${esc(s.ja)}<span class="badge ${s.iucn === "低懸念" ? "lc" : ""}">${esc(s.iucn)}</span></div>
+          <div class="s">${esc(s.sci)}・体長 ${esc(s.size)}</div>
+          <p>${esc(s.desc)}</p>
+          <div class="ext">
+            <a href="${gImg(name)}" target="_blank" rel="noopener">Google画像 ↗</a>
+            ${f ? `<a href="${gImg(f.name + " " + name)}" target="_blank" rel="noopener">${esc(f.name)}の${esc(spShort(k))} ↗</a>` : ""}
+            <a href="${esc(s.credit)}" target="_blank" rel="noopener">写真の出典 ↗</a>
+          </div>
+        </div>
+      </div>`;
+    lb.hidden = false;
+    lb.onclick = e => { if (e.target === lb || e.target.closest(".pop-close")) lb.hidden = true; };
+  }
+
   // 県のシート：県内の施設一覧と、県内で会える種類
   function openPref(p, zoom) {
     if (zoom && prefBounds[p]) {
@@ -240,7 +265,7 @@
       </div>
       <div class="sec">
         <h3>${esc(shortPref(p))}で会えるペンギン（${sps.length}種）</h3>
-        <div class="sp-chips">${sps.map(k => `<span class="spc"><img src="${esc(SP[k].img)}" alt="">${esc(SP[k].ja.replace(/（.*）/, ""))}</span>`).join("")}</div>
+        <div class="sp-chips">${sps.map(k => `<button class="spc" data-k="${k}"><img src="${esc(SP[k].img)}" alt="">${esc(SP[k].ja.replace(/（.*）/, ""))}</button>`).join("")}</div>
       </div>
       <div class="sec">
         <h3>施設（${shown.length}${shown.length !== all.length ? ` / 全${all.length}` : ""}）</h3>
@@ -255,6 +280,7 @@
             <span class="chev">›</span>
           </button>`; }).join("")}
       </div>`;
+    $("#sheetBody").querySelectorAll(".spc").forEach(b => b.onclick = () => openSpecies(b.dataset.k));
     $("#sheetBody").querySelectorAll(".pf").forEach(el => el.onclick = () => {
       const f = FAC.find(x => x.name === el.dataset.name);
       if (f.lat != null) map.setView([f.lat, f.lng], Math.max(map.getZoom(), 13));
@@ -295,21 +321,12 @@
 
       <div class="sec">
         <h3>会えるペンギン（${sps.length}種）</h3>
-        ${sps.map(k => { const s = SP[k]; return `
-          <div class="sp">
-            <img src="${esc(s.img)}" alt="${esc(s.ja)}" loading="lazy" data-k="${k}">
-            <div>
-              <div class="t">${esc(s.ja)}<span class="badge ${s.iucn === "低懸念" ? "lc" : ""}">${esc(s.iucn)}</span></div>
-              <div class="s">${esc(s.sci)}</div>
-              <div class="m">体長 ${esc(s.size)}</div>
-              <p>${esc(s.desc)}</p>
-              <div class="ext">
-                <a href="${gImg(s.ja.replace(/（.*）/, ""))}" target="_blank" rel="noopener">Google画像 ↗</a>
-                <a href="${gImg(f.name + " " + s.ja.replace(/（.*）/, ""))}" target="_blank" rel="noopener">この施設の${esc(s.ja.replace(/（.*）/, "").replace("ペンギン", ""))} ↗</a>
-              </div>
-            </div>
-          </div>`; }).join("")}
-        <p class="note">写真：Wikimedia Commons（各写真をタップすると出典）。飼育種は変わることがあるので、お出かけ前に公式サイトで確認してください。</p>
+        <div class="sp-row">${sps.map(k => `
+          <button class="spi" data-k="${k}" aria-label="${esc(SP[k].ja)}の説明">
+            <img src="${esc(SP[k].img)}" alt="" loading="lazy">
+            <span>${esc(spShort(k))}</span>
+          </button>`).join("")}</div>
+        <p class="note">写真をタップすると説明が出ます。飼育種は変わることがあるので、お出かけ前に公式サイトで確認してください。</p>
       </div>`;
 
     if (backPref) $("#backPref").onclick = () => openPref(backPref, false);
@@ -327,13 +344,10 @@
     });
     $("#visitDate").onchange = e => { save(f, { date: e.target.value }); flash(); };
     let t; $("#memo").oninput = e => { clearTimeout(t); t = setTimeout(() => { save(f, { memo: e.target.value }); flash(); }, 400); };
-    $("#sheetBody").querySelectorAll(".sp img").forEach(img => {
-      img.onerror = () => { img.onerror = null; img.src = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><text y="7.5" x="1.5" font-size="7">🐧</text></svg>'); };
-      img.onclick = () => {
-        const s = SP[img.dataset.k], lb = $("#lightbox");
-        lb.innerHTML = `<img src="${esc(s.img)}" alt=""><div class="cap">${esc(s.ja)} — <a href="${esc(s.credit)}" target="_blank" rel="noopener">出典・ライセンス（Wikimedia Commons）</a></div>`;
-        lb.hidden = false; lb.onclick = e => { if (e.target.tagName !== "A") lb.hidden = true; };
-      };
+    $("#sheetBody").querySelectorAll(".spi").forEach(b => {
+      const img = b.querySelector("img");
+      img.onerror = () => { img.onerror = null; img.removeAttribute("src"); };
+      b.onclick = () => openSpecies(b.dataset.k, f);
     });
     sheet.classList.add("open"); sheet.setAttribute("aria-hidden", "false"); sheet.scrollTop = 0;
   }
