@@ -1,6 +1,6 @@
 // オフラインでもアプリ画面が開けるようにするキャッシュ。
 // アプリのファイルを変えたら VERSION を上げる（古いキャッシュが消えて新しい版になる）。
-const VERSION = "v13";
+const VERSION = "v14";
 const APP = `app-${VERSION}`;
 const TILES = "tiles"; // 一度表示した地図タイル（上限あり）
 const TILE_LIMIT = 1500;

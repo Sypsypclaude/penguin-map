@@ -318,7 +318,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 行った回数と日付）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 スワイプで閉じる）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -353,6 +353,48 @@
     sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true");
     if (backToPref && wasOpen && sheetPref) goToPref(sheetPref);
   }
+
+  // ---- スワイプで閉じる ----
+  // スマホ（下から出るシート）は下へ、PC（右から出るパネル）は右へ引っぱると閉じる。
+  // 中身がスクロールされている途中は、スクロールを優先する。
+  (() => {
+    let start = null, delta = 0, dragging = false;
+    const isBottom = () => window.matchMedia("(max-width:720px)").matches;
+    sheet.addEventListener("touchstart", e => {
+      if (!sheet.classList.contains("open") || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const onGrip = e.target.closest(".sheet-grip, .sh-head, .back");
+      start = { x: t.clientX, y: t.clientY, top: sheet.scrollTop, onGrip, time: Date.now() };
+      delta = 0; dragging = false;
+    }, { passive: true });
+    sheet.addEventListener("touchmove", e => {
+      if (!start) return;
+      const t = e.touches[0];
+      const dx = t.clientX - start.x, dy = t.clientY - start.y;
+      const d = isBottom() ? dy : dx;
+      const cross = isBottom() ? Math.abs(dx) : Math.abs(dy);
+      if (!dragging) {
+        // 下（右）向きに動き始め、かつ中身がいちばん上にあるときだけ引っぱり開始
+        if (d > 8 && d > cross && (start.onGrip || sheet.scrollTop <= 0)) { dragging = true; sheet.classList.add("dragging"); }
+        else if (Math.abs(d) > 8 || cross > 8) { start = null; return; }
+        else return;
+      }
+      delta = Math.max(0, d);
+      sheet.style.transform = isBottom() ? `translateY(${delta}px)` : `translateX(${delta}px)`;
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+    const end = () => {
+      if (!start) return;
+      const fast = delta > 40 && delta / Math.max(1, Date.now() - start.time) > 0.6;
+      const size = isBottom() ? sheet.offsetHeight : sheet.offsetWidth;
+      sheet.classList.remove("dragging");
+      sheet.style.transform = "";
+      if (dragging && (delta > size * 0.25 || fast)) closeSheet(true);
+      start = null; dragging = false; delta = 0;
+    };
+    sheet.addEventListener("touchend", end);
+    sheet.addEventListener("touchcancel", end);
+  })();
 
   const spShort = k => SP[k].ja.replace(/（.*）/, "").replace(/ペンギン$/, "");
   function openSpecies(k, f) {
