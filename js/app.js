@@ -25,14 +25,20 @@
   const pale = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
     maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   });
-  pale.addTo(map);
   const photo = L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
     maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
   });
   const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   });
-  L.control.layers({ "地理院 淡色地図": pale, "地理院 標準地図": gsi, "航空写真": photo, "OpenStreetMap": osm }, null, { position: "topright" }).addTo(map);
+  // 地図の種類（淡色・航空写真など）は、閉じて開き直しても最後に選んだものにする
+  const BASES = { "地理院 淡色地図": pale, "地理院 標準地図": gsi, "航空写真": photo, "OpenStreetMap": osm };
+  const BASE_KEY = "penguin-map-base";
+  let savedBase = null;
+  try { savedBase = localStorage.getItem(BASE_KEY); } catch {}
+  (BASES[savedBase] || pale).addTo(map);
+  L.control.layers(BASES, null, { position: "topright" }).addTo(map);
+  map.on("baselayerchange", e => { try { localStorage.setItem(BASE_KEY, e.name); } catch {} });
 
   // ---- 都道府県（境界線・色分け・件数バッジ） ----
   // 引いて見ているときは「県ごと」、拡大すると施設ごとのピンに切り替える
@@ -105,6 +111,31 @@
     }
   });
   map.on("zoomend", updateMode);
+
+  // 住所（「県 市 区 町 …」）から市区町村を取り出す
+  function muni(f) {
+    const t = (f.address || "").split(/\s+/).filter(Boolean);
+    if (t[0] === f.pref) t.shift();
+    const i = t.findIndex(x => /[市区町村郡]$/.test(x) || /[市区町村]（/.test(x));
+    if (i < 0) return "";
+    let m = t[i].replace(/（.*$/, "");
+    if (/郡$/.test(m) && t[i + 1] && /[町村]$/.test(t[i + 1])) m = t[i + 1];
+    else if (/市$/.test(m) && t[i + 1] && /区$/.test(t[i + 1])) m += t[i + 1];
+    return m;
+  }
+  // 施設ごとに見えるくらいまで拡大したら、名前のラベルを出しっぱなしにする
+  const LABEL_ZOOM = 10;
+  let labelsOn = null;
+  function tipHtml(f) { const m = muni(f); return `<b>${esc(f.name)}</b>${m ? `<span class="tip-muni">${esc(m)}</span>` : ""}`; }
+  function updateLabels() {
+    const on = map.getZoom() >= LABEL_ZOOM;
+    if (on === labelsOn) return;
+    labelsOn = on;
+    markers.forEach((m, f) => {
+      m.unbindTooltip().bindTooltip(tipHtml(f), { className: on ? "tip tip-on" : "tip", direction: "top", offset: [0, -16], permanent: on });
+    });
+  }
+  map.on("zoomend", updateLabels);
   // 施設1か所のピン。行った施設は青く塗って✓
   const PENGUIN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="13.5" rx="7" ry="9" fill="#14181f"/><ellipse cx="12" cy="15" rx="4.6" ry="6.6" fill="#fff"/><circle cx="12" cy="7.5" r="5" fill="#14181f"/><ellipse cx="10.3" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><ellipse cx="13.7" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><circle cx="10.5" cy="7.8" r=".8" fill="#14181f"/><circle cx="13.5" cy="7.8" r=".8" fill="#14181f"/><path d="M10.9 9.6h2.2L12 11.2z" fill="#f5a524"/></svg>';
   const iconFor = f => {
@@ -115,8 +146,7 @@
   FAC.forEach(f => {
     if (f.lat == null) return;
     const m = L.marker([f.lat, f.lng], { icon: iconFor(f), title: f.name, fac: f })
-      .bindTooltip(`${esc(f.name)}`, { className: "tip", direction: "top", offset: [0, -16] })
-      .on("click", () => openSheet(f));
+            .on("click", () => openSheet(f));
     markers.set(f, m);
   });
 
@@ -191,7 +221,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 アクセス全施設）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 名前ラベル・地図の記憶）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -373,5 +403,5 @@
     sheet.classList.add("open"); sheet.setAttribute("aria-hidden", "false"); sheet.scrollTop = 0;
   }
 
-  refreshMarkers(); renderStats(); updateMode();
+  refreshMarkers(); renderStats(); updateMode(); updateLabels();
 })();
