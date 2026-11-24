@@ -127,15 +127,107 @@
   const LABEL_ZOOM = 10;
   let labelsOn = null;
   function tipHtml(f) { const m = muni(f); return `<b>${esc(f.name)}</b>${m ? `<span class="tip-muni">${esc(m)}</span>` : ""}`; }
+  // 引いているときはホバーの吹き出し、拡大したら下の「ラベル配置」で常に表示
   function updateLabels() {
     const on = map.getZoom() >= LABEL_ZOOM;
-    if (on === labelsOn) return;
-    labelsOn = on;
-    markers.forEach((m, f) => {
-      m.unbindTooltip().bindTooltip(tipHtml(f), { className: on ? "tip tip-on" : "tip", direction: "top", offset: [0, -16], permanent: on });
-    });
+    if (on !== labelsOn) {
+      labelsOn = on;
+      markers.forEach((m, f) => {
+        m.unbindTooltip();
+        if (!on) m.bindTooltip(tipHtml(f), { className: "tip", direction: "top", offset: [0, -16] });
+      });
+    }
+    layoutLabels();
   }
   map.on("zoomend", updateLabels);
+
+  // ---- ラベル配置：ピンは動かさず、ラベルだけを空いている場所へずらす ----
+  // 近くにピンや他のラベルがあるときは、上→下→右→左→斜めの順に、少しずつ離して空きを探す。
+  // 離したラベルはピンと引き出し線でつなぐ。
+  const labelPane = map.createPane("labels");
+  labelPane.style.zIndex = 640;
+  labelPane.style.pointerEvents = "none";
+  const PIN_R = 19;           // ピンの半径（少し余白込み）
+  const STEPS = [0, 16, 36, 60, 88];
+  function candidates(p, w, h, e) {
+    const g = PIN_R + 3 + e;
+    return [
+      [p.x - w / 2, p.y - g - h],          // 上
+      [p.x - w / 2, p.y + g],              // 下
+      [p.x + g, p.y - h / 2],              // 右
+      [p.x - g - w, p.y - h / 2],          // 左
+      [p.x + g * .7, p.y - g * .7 - h],    // 右上
+      [p.x - g * .7 - w, p.y - g * .7 - h],// 左上
+      [p.x + g * .7, p.y + g * .7],        // 右下
+      [p.x - g * .7 - w, p.y + g * .7]     // 左下
+    ];
+  }
+  const overlap = (a, b) => Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1)) * Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
+  function layoutLabels() {
+    labelPane.innerHTML = "";
+    if (map.getZoom() < LABEL_ZOOM || !map.hasLayer(cluster)) return;
+    const view = map.getPixelBounds().pad(0.15), origin = map.getPixelOrigin();
+    const vis = [];
+    markers.forEach((m, f) => {
+      if (!cluster.hasLayer(m) || cluster.getVisibleParent(m) !== m) return;
+      const p = map.latLngToLayerPoint(m.getLatLng());
+      if (!view.contains(p.add(origin))) return;
+      vis.push({ f, p });
+    });
+    // 障害物：すべてのピンと、まとめ表示（○か所）
+    const blocks = vis.map(v => ({ x1: v.p.x - PIN_R, y1: v.p.y - PIN_R, x2: v.p.x + PIN_R, y2: v.p.y + PIN_R }));
+    cluster._featureGroup?.eachLayer(l => {
+      if (l instanceof L.MarkerCluster) { const q = map.latLngToLayerPoint(l.getLatLng()); blocks.push({ x1: q.x - 36, y1: q.y - 16, x2: q.x + 36, y2: q.y + 16 }); }
+    });
+    // 混んでいる所から先に置くと、全体がきれいに収まりやすい
+    vis.forEach(v => { v.crowd = vis.filter(o => o !== v && o.p.distanceTo(v.p) < 140).length; });
+    vis.sort((a, b) => b.crowd - a.crowd || a.p.y - b.p.y);
+    const tl = map.containerPointToLayerPoint([4, 4]), br = map.containerPointToLayerPoint(map.getSize().subtract([4, 4]));
+    const screen = { x1: tl.x, y1: tl.y, x2: br.x, y2: br.y };
+    const lines = document.createDocumentFragment(), boxes = document.createDocumentFragment();
+    const placed = [];
+    for (const v of vis) {
+      const el = document.createElement("div");
+      el.className = "lbl"; el.innerHTML = tipHtml(v.f);
+      labelPane.appendChild(el);
+      const w = el.offsetWidth, h = el.offsetHeight;
+      let best = null, bestScore = Infinity;
+      search: for (const e of STEPS) {
+        for (const [x, y] of candidates(v.p, w, h, e)) {
+          const r = { x1: x - 2, y1: y - 2, x2: x + w + 2, y2: y + h + 2 };
+          let s = 0;
+          for (const b of placed) s += overlap(r, b);
+          for (const b of blocks) s += overlap(r, b);
+          s += (w * h - overlap({ x1: x, y1: y, x2: x + w, y2: y + h }, screen)) * 3; // 画面からはみ出す分は大きく減点
+          const clear = s === 0;
+          s += e * 2; // 遠くに離すほど少し減点
+          if (s < bestScore) { bestScore = s; best = { x, y, e }; }
+          if (clear) break search; // 重なりもはみ出しもない
+        }
+      }
+      placed.push({ x1: best.x, y1: best.y, x2: best.x + w, y2: best.y + h });
+      L.DomUtil.setPosition(el, L.point(best.x, best.y));
+      el.onclick = ev => { ev.stopPropagation(); openSheet(v.f); };
+      boxes.appendChild(el);
+      // 離したラベルには引き出し線
+      if (best.e > 0 || Math.abs(best.y + h / 2 - v.p.y) < h) {
+        const tx = Math.max(best.x, Math.min(v.p.x, best.x + w)), ty = Math.max(best.y, Math.min(v.p.y, best.y + h));
+        const dx = tx - v.p.x, dy = ty - v.p.y, len = Math.hypot(dx, dy);
+        if (len > PIN_R) {
+          const ln = document.createElement("div");
+          ln.className = "lbl-line";
+          const sx = v.p.x + dx / len * (PIN_R - 2), sy = v.p.y + dy / len * (PIN_R - 2);
+          ln.style.width = (len - PIN_R + 2) + "px";
+          ln.style.transform = `translate(${sx}px, ${sy}px) rotate(${Math.atan2(dy, dx)}rad)`;
+          lines.appendChild(ln);
+        }
+      }
+    }
+    labelPane.appendChild(lines);
+    labelPane.appendChild(boxes);
+  }
+  map.on("zoomstart", () => { labelPane.innerHTML = ""; });
+  map.on("moveend", layoutLabels);
   // 施設1か所のピン。行った施設は青く塗って✓
   const PENGUIN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="13.5" rx="7" ry="9" fill="#14181f"/><ellipse cx="12" cy="15" rx="4.6" ry="6.6" fill="#fff"/><circle cx="12" cy="7.5" r="5" fill="#14181f"/><ellipse cx="10.3" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><ellipse cx="13.7" cy="7.8" rx="1.8" ry="2.2" fill="#fff"/><circle cx="10.5" cy="7.8" r=".8" fill="#14181f"/><circle cx="13.5" cy="7.8" r=".8" fill="#14181f"/><path d="M10.9 9.6h2.2L12 11.2z" fill="#f5a524"/></svg>';
   const iconFor = f => {
@@ -169,7 +261,9 @@
     cluster.clearLayers(); cluster.addLayers(show);
     stylePrefs();
     if (map.hasLayer(prefBadges)) renderPrefBadges();
+    layoutLabels();
   }
+  cluster.on("animationend spiderfied unspiderfied", layoutLabels);
 
   const chips = $("#speciesChips");
   ORDER.forEach(k => {
@@ -221,7 +315,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 名前ラベル・地図の記憶）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 ラベル重なり防止）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
