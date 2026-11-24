@@ -53,7 +53,7 @@
     pane: "prefs",
     style: () => ({}),
     onEachFeature: (feat, layer) => {
-      layer.on("click", e => { L.DomEvent.stop(e); openPref(feat.properties.nam_ja, true); });
+      layer.on("click", e => { L.DomEvent.stop(e); tapPref(feat.properties.nam_ja); });
     }
   }).addTo(map);
   const prefBounds = {};
@@ -85,14 +85,7 @@
         icon: L.divIcon({ className: "", iconSize: null,
           html: `<div class="pb ${v ? "v" : ""} ${showName ? "" : "mini"}">${showName ? `<span>${esc(shortPref(p))}</span>` : ""}<b>${n}</b></div>` }),
         title: `${p}（${n}施設）`, keyboard: true
-      }).on("click", e => {
-        L.DomEvent.stop(e);
-        // 近くに他の県のバッジが重なっていたら、選び間違えないようにまず拡大する
-        const here = map.latLngToContainerPoint(e.latlng);
-        const crowded = prefBadges.getLayers().some(m => m !== e.target && map.latLngToContainerPoint(m.getLatLng()).distanceTo(here) < 34);
-        if (crowded && map.getZoom() < PREF_ZOOM - 1) map.setView(e.latlng, map.getZoom() + 2);
-        else openPref(p, true);
-      }).addTo(prefBadges);
+      }).on("click", e => { L.DomEvent.stop(e); tapPref(p); }).addTo(prefBadges);
     }
   }
   function updateMode() {
@@ -315,7 +308,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 ラベル重なり防止）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 県タップで移動）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -381,6 +374,15 @@
   }
   // 今シートで見ている県（×で閉じたら、この県の全体に戻す）
   let sheetPref = null;
+
+  // 県をタップ：1回目はその県の全体を真ん中に表示するだけ。同じ県をもう一度タップしたら一覧を開く
+  let focusedPref = null;
+  function tapPref(p) {
+    if (focusedPref === p) { openPref(p, false); return; }
+    focusedPref = p;
+    map.fitBounds(prefView(p), { padding: [16, 16] });
+  }
+  map.on("dragstart", () => { focusedPref = null; });
 
   // 県のシート：県内の施設一覧と、県内で会える種類
   function openPref(p, zoom) {
