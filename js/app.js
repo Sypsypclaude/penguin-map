@@ -293,13 +293,34 @@
     const b = document.createElement("button");
     b.className = "chip"; b.setAttribute("aria-pressed", "false");
     b.innerHTML = `${esc(SP[k].ja.replace(/（.*）/, ""))}<span class="n">${n}</span>`;
+    b.dataset.k = k;
     b.onclick = () => {
       state.species.has(k) ? state.species.delete(k) : state.species.add(k);
       b.setAttribute("aria-pressed", state.species.has(k));
-      applyFilters();
+      updateSpToggle(); applyFilters();
     };
     chips.appendChild(b);
   });
+  // 種類の絞り込みは「🐧 種類」ボタンを押したときだけ開く
+  const spClear = document.createElement("button");
+  spClear.className = "chip clear"; spClear.textContent = "すべて解除"; spClear.hidden = true;
+  spClear.onclick = () => {
+    state.species.clear();
+    chips.querySelectorAll(".chip[data-k]").forEach(c => c.setAttribute("aria-pressed", "false"));
+    updateSpToggle(); applyFilters();
+  };
+  chips.appendChild(spClear);
+  function updateSpToggle() {
+    const n = state.species.size;
+    $("#spCount").textContent = n ? `（${n}）` : "";
+    $("#spToggle").classList.toggle("on", n > 0);
+    spClear.hidden = !n;
+  }
+  $("#spToggle").onclick = () => {
+    chips.hidden = !chips.hidden;
+    $("#spToggle").setAttribute("aria-expanded", !chips.hidden);
+    setTimeout(() => map.invalidateSize(), 50);
+  };
   $("#search").addEventListener("input", e => { state.q = e.target.value.trim(); applyFilters(); });
   $("#onlyVisited").addEventListener("change", e => { state.onlyVisited = e.target.checked; if (e.target.checked) { $("#onlyUnvisited").checked = false; state.onlyUnvisited = false; } applyFilters(); });
   $("#onlyUnvisited").addEventListener("change", e => { state.onlyUnvisited = e.target.checked; if (e.target.checked) { $("#onlyVisited").checked = false; state.onlyVisited = false; } applyFilters(); });
@@ -320,16 +341,64 @@
     $("#stats").innerHTML = `<span class="wide">全<b>${FAC.length}</b>施設・<b>${ORDER.length}</b>種　｜　</span>行った <b>${visited.length}</b> 施設・<b>${vPrefs.size}</b>/${prefs.size} 県・会えた <b>${seen.size}</b>/${ORDER.length} 種`;
   }
 
-  // ---- 一覧 ----
-  $("#listToggle").onclick = e => {
-    const list = $("#list"); list.hidden = !list.hidden;
-    e.currentTarget.setAttribute("aria-pressed", !list.hidden);
-    if (!list.hidden) renderList();
-    setTimeout(() => map.invalidateSize(), 50);
-  };
+  // ---- タブ（地図／サマリー） ----
+  function setView(v) {
+    const sum = v === "sum";
+    $("#tabMap").setAttribute("aria-selected", !sum);
+    $("#tabSum").setAttribute("aria-selected", sum);
+    $("#list").hidden = !sum;
+    document.body.classList.toggle("sum-view", sum);
+    if (sum) { closeSheet(false); renderList(); $("#list").scrollTop = 0; }
+    else map.invalidateSize();
+  }
+  $("#tabMap").onclick = () => setView("map");
+  $("#tabSum").onclick = () => setView("sum");
+  // サマリーから施設や県を選んだら、地図に切り替えてそこを開く
+  function showFacility(f) {
+    setView("map");
+    if (f.lat != null) map.setView([f.lat, f.lng], 13);
+    openSheet(f);
+  }
+
+  // ---- サマリー ----
   function renderList() {
+    const visited = FAC.filter(f => rec(f).visited);
+    const seen = new Set(visited.flatMap(f => f.species));
+    const prefsAll = PREF_ORDER.filter(p => FAC.some(f => f.pref === p));
+    const vPrefs = new Set(visited.map(f => f.pref));
+    const totalVisits = visited.reduce((n, f) => n + rec(f).visits.length, 0);
+    const recent = FAC.flatMap(f => rec(f).visits.filter(Boolean).map(d => ({ f, d })))
+      .sort((a, b) => b.d.localeCompare(a.d)).slice(0, 5);
+    const card = (k, n, of) => `<div class="sum-card"><div class="k">${k}</div><div class="v"><b>${n}</b>${of}</div></div>`;
+    const fmt = d => d.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1年$2月$3日");
+
+    let html = `<div class="sum-wrap">
+      <div class="sum-cards">
+        ${card("行った施設", visited.length, ` / ${FAC.length}`)}
+        ${card("行った都道府県", vPrefs.size, ` / ${prefsAll.length}`)}
+        ${card("会えたペンギン", seen.size, ` / ${ORDER.length}種`)}
+        ${card("行った回数", totalVisits, "回")}
+      </div>
+      <div class="sec">
+        <h3>会えたペンギン（${seen.size} / ${ORDER.length}種）</h3>
+        <div class="sp-row">${ORDER.map(k => `<button class="spi ${seen.has(k) ? "" : "unseen"}" data-k="${k}">
+          <img src="${esc(SP[k].img)}" alt="" loading="lazy"><span>${esc(SP[k].ja.replace(/（.*）/, ""))}</span></button>`).join("")}</div>
+        <p class="note">白黒の種類は、まだ会えていない種類。行った施設にいる種類が「会えた」になります。</p>
+      </div>`;
+    if (recent.length) {
+      html += `<div class="sec"><h3>最近の訪問</h3><div class="recent">${recent.map(x => `
+        <button class="rc" data-name="${esc(x.f.name)}"><span class="d">${esc(fmt(x.d))}</span><span class="nm">${esc(x.f.name)}</span><span class="chev">›</span></button>`).join("")}</div></div>`;
+    }
+    html += `<div class="sec"><h3>都道府県ごと</h3><div class="prefs">${prefsAll.map(p => {
+        const all = FAC.filter(f => f.pref === p), v = all.filter(f => rec(f).visited).length;
+        return `<button class="pr ${v ? "v" : ""}" data-p="${esc(p)}"><span class="pn">${esc(shortPref(p))}</span>
+          <span class="bar"><i style="width:${Math.round(v / all.length * 100)}%"></i></span><span class="pc">${v}/${all.length}</span></button>`;
+      }).join("")}</div></div>`;
+
     const items = FAC.filter(matches).sort((a, b) => PREF_ORDER.indexOf(a.pref) - PREF_ORDER.indexOf(b.pref));
-    let html = `<div class="pref-head">${items.length} 施設</div>`, cur = "";
+    const filtered = items.length !== FAC.length;
+    html += `<div class="sec flat"><h3>施設一覧（${items.length}${filtered ? ` / 全${FAC.length}・絞り込み中` : ""}）</h3></div>`;
+    let cur = "";
     for (const f of items) {
       if (f.pref !== cur) { cur = f.pref; html += `<div class="pref-head">${esc(cur)}</div>`; }
       const r = rec(f);
@@ -337,14 +406,12 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 施設は2回タップで詳細）<br>
-      <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-25 ${FAC.length}施設・地図とサマリーのタブ）<br>
+      <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div></div>`;
     const list = $("#list"); list.innerHTML = html;
-    list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
-      const f = FAC.find(x => x.name === el.dataset.name);
-      if (f.lat != null) map.setView([f.lat, f.lng], 13);
-      openSheet(f);
-    });
+    list.querySelectorAll(".list-item, .rc").forEach(el => el.onclick = () => showFacility(FAC.find(x => x.name === el.dataset.name)));
+    list.querySelectorAll(".spi").forEach(el => el.onclick = () => openSpecies(el.dataset.k));
+    list.querySelectorAll(".pr").forEach(el => el.onclick = () => { setView("map"); openPref(el.dataset.p, true); });
     $("#exportBtn").onclick = () => {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(store, null, 1)], { type: "application/json" }));

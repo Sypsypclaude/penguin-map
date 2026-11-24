@@ -149,6 +149,23 @@ window.FACILITIES = [
   "note": "夏季のみの営業（例年4月下旬〜10月中旬）"
  },
  {
+  "name": "釧路市動物園",
+  "pref": "北海道",
+  "type": "動物園",
+  "species": [
+   "humboldt"
+  ],
+  "url": "https://www.city.kushiro.lg.jp/zoo/",
+  "lat": 43.0826,
+  "lng": 144.23449,
+  "address": "北海道 釧路市 阿寒町下仁々志別",
+  "access": {
+   "train": "JR釧路駅前から阿寒バス「動物園」行き 約40分",
+   "car": "釧路市街から約30分・無料駐車場あり",
+   "src": "https://www.city.kushiro.lg.jp/zoo/"
+  }
+ },
+ {
   "name": "青森県営浅虫水族館",
   "pref": "青森県",
   "type": "水族館",
@@ -499,6 +516,40 @@ window.FACILITIES = [
   }
  },
  {
+  "name": "茶臼山動物園",
+  "pref": "長野県",
+  "type": "動物園",
+  "species": [
+   "humboldt"
+  ],
+  "url": "https://chausuyama.com/",
+  "lat": 36.58533,
+  "lng": 138.11524,
+  "address": "長野県 長野市 篠ノ井有旅",
+  "access": {
+   "train": "JR篠ノ井駅からタクシー約15分（バスもあり）",
+   "car": "長野道 更埴IC・上信越道 長野ICから約25分",
+   "src": "https://www.walkerplus.com/spot/ar0420s16299/data.html"
+  }
+ },
+ {
+  "name": "長野市城山動物園",
+  "pref": "長野県",
+  "type": "動物園",
+  "species": [
+   "humboldt"
+  ],
+  "url": "https://www.johyama.com/",
+  "lat": 36.66494,
+  "lng": 138.19434,
+  "address": "長野県 長野市 上松",
+  "access": {
+   "train": "長野駅からバス「動物園下」下車 徒歩約3分／長野電鉄「善光寺下」駅から徒歩約20分",
+   "car": "城山公園の駐車場を利用",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_12866.html"
+  }
+ },
+ {
   "name": "静岡市立日本平動物園",
   "pref": "静岡県",
   "type": "動物園",
@@ -621,6 +672,23 @@ window.FACILITIES = [
   }
  },
  {
+  "name": "伊豆シャボテン動物公園",
+  "pref": "静岡県",
+  "type": "動物園",
+  "species": [
+   "african"
+  ],
+  "url": "https://izushaboten.com/",
+  "lat": 34.9072,
+  "lng": 139.10085,
+  "address": "静岡県 伊東市 富戸",
+  "access": {
+   "train": "伊豆急「伊豆高原」駅から東海バス約15分「シャボテン公園」下車",
+   "car": "伊東市街から約30分・駐車場あり（有料）",
+   "src": "https://izushaboten.com/"
+  }
+ },
+ {
   "name": "名古屋港水族館",
   "pref": "愛知県",
   "type": "水族館",
@@ -738,7 +806,7 @@ window.FACILITIES = [
   "pref": "東京都",
   "type": "動物園",
   "species": [
-   "humboldt"
+   "african"
   ],
   "url": "https://www.tokyo-zoo.net/zoo/ueno/",
   "lat": 35.7164,
@@ -867,6 +935,23 @@ window.FACILITIES = [
   "access": {
    "train": "「押上（スカイツリー前）」駅から徒歩5分（東京スカイツリータウン内）",
    "src": "https://www.sumida-aquarium.com/about/access/"
+  }
+ },
+ {
+  "name": "井の頭自然文化園",
+  "pref": "東京都",
+  "type": "動物園",
+  "species": [
+   "humboldt"
+  ],
+  "url": "https://www.tokyo-zoo.net/zoo/ino/",
+  "lat": 35.70069,
+  "lng": 139.57118,
+  "address": "東京都 武蔵野市 御殿山",
+  "access": {
+   "train": "JR・京王井の頭線「吉祥寺」駅 南口（公園口）から徒歩約10分",
+   "car": "専用駐車場なし（周辺の有料駐車場）",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_1099.html"
   }
  },
  {
@@ -1084,6 +1169,23 @@ window.FACILITIES = [
   }
  },
  {
+  "name": "狭山市立智光山公園こども動物園",
+  "pref": "埼玉県",
+  "type": "動物園",
+  "species": [
+   "african"
+  ],
+  "url": "https://www.parks.or.jp/chikozan/",
+  "lat": 35.88142,
+  "lng": 139.39361,
+  "address": "埼玉県 狭山市 柏原",
+  "access": {
+   "train": "西武新宿線「狭山市」駅西口から西武バス「智光山公園」行き 約15分",
+   "car": "圏央道 狭山日高ICから約10分・駐車場あり",
+   "src": "https://www.parks.or.jp/chikozan/"
+  }
+ },
+ {
   "name": "日立市かみね動物園",
   "pref": "茨城県",
   "type": "動物園",
@@ -1151,6 +1253,24 @@ window.FACILITIES = [
    "car": "東北道 那須ICから約30分",
    "src": "https://kids.rurubu.jp/article/225/"
   }
+ },
+ {
+  "name": "おさるランド＆アニタウン（日光さる軍団）",
+  "pref": "栃木県",
+  "type": "動物園",
+  "species": [
+   "african"
+  ],
+  "url": "https://www.osaruland.jp/",
+  "lat": 36.78299,
+  "lng": 139.7019,
+  "address": "栃木県 日光市 柄倉",
+  "access": {
+   "train": "東武「新高徳」駅からバス約5分／「鬼怒川温泉」駅からバス約15分",
+   "car": "日光宇都宮道路 今市ICから約15分・駐車場あり",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_50876.html"
+  },
+  "note": "ペンギンは園内「アニタウン」のペンギンガーデンにいる。暑い時期は休むことがある（2026年5月から休止のお知らせあり）"
  },
  {
   "name": "桐生が岡動物園",
@@ -1373,6 +1493,57 @@ window.FACILITIES = [
   "access": {
    "train": "JR・阪神「元町」駅から南へ徒歩約15分／三宮駅から徒歩約18分",
    "src": "https://atoa-kobe.jp/access/"
+  }
+ },
+ {
+  "name": "姫路市立動物園",
+  "pref": "兵庫県",
+  "type": "動物園",
+  "species": [
+   "magellanic"
+  ],
+  "url": "https://www.city.himeji.lg.jp/dobutuen/",
+  "lat": 34.83711,
+  "lng": 134.69539,
+  "address": "兵庫県 姫路市 本町",
+  "access": {
+   "train": "JR・山陽「姫路」駅から北へ徒歩約15分（姫路城の東隣）",
+   "car": "専用駐車場なし（周辺の有料駐車場）",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_5632.html"
+  }
+ },
+ {
+  "name": "神戸須磨シーワールド",
+  "pref": "兵庫県",
+  "type": "水族館",
+  "species": [
+   "magellanic"
+  ],
+  "url": "https://www.kobesuma-seaworld.jp/",
+  "lat": 34.64395,
+  "lng": 135.12784,
+  "address": "兵庫県 神戸市 須磨区",
+  "access": {
+   "train": "JR「須磨海浜公園」駅から徒歩約5分／山陽「月見山」駅から徒歩約10分",
+   "car": "阪神高速 若宮出入口からすぐ・駐車場あり（有料）",
+   "src": "https://www.kobesuma-seaworld.jp/"
+  }
+ },
+ {
+  "name": "神崎農村公園ヨーデルの森",
+  "pref": "兵庫県",
+  "type": "動物園",
+  "species": [
+   "african"
+  ],
+  "url": "https://yodel-forest.jp/",
+  "lat": 35.139,
+  "lng": 134.79151,
+  "address": "兵庫県 神崎郡 神河町",
+  "access": {
+   "train": "JR播但線「生野」駅から神姫グリーンバス約8分「ヨーデルの森」下車",
+   "car": "播但連絡道路 生野ICから約10分・駐車場あり",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_7899.html"
   }
  },
  {

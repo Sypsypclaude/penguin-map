@@ -29,9 +29,44 @@ button{font:inherit;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .chip .n{opacity:.7;margin-left:3px}
 
+/* タブ（地図／サマリー） */
+.tabs{display:flex;flex:none;background:rgba(255,255,255,.12);border-radius:10px;padding:3px;gap:2px}
+.tabs button{border:none;background:none;color:#fff;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#fff;color:#0f2a44;opacity:1}
+/* 種類の絞り込みボタン */
+.sp-toggle{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.sp-toggle .caret{margin-left:4px;font-size:10px;display:inline-block;transition:transform .2s}
+.sp-toggle[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.sp-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chips{flex-wrap:wrap;overflow:visible}
+.chips[hidden]{display:none}
+.chip.clear{background:#fff;color:var(--accent);border-color:var(--accent)}
+
 main{flex:1;position:relative;min-height:0;display:flex}
-#map{flex:1}
-.list{width:380px;max-width:100%;overflow-y:auto;background:#fff;border-left:1px solid var(--line)}
+#map{flex:1;isolation:isolate}
+/* サマリー：地図の上に全面で重ねる */
+.list{position:absolute;inset:0;z-index:500;overflow-y:auto;background:var(--bg);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sum-wrap{max-width:760px;margin:0 auto;background:#fff;min-height:100%}
+.sum-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:14px}
+.sum-card{background:var(--bg);border-radius:12px;padding:10px 12px}
+.sum-card .k{font-size:11px;color:var(--sub);font-weight:600}
+.sum-card .v{font-size:12px;color:var(--sub);margin-top:2px}
+.sum-card .v b{font-size:24px;color:var(--visited)}
+.spi.unseen img{filter:grayscale(1);opacity:.45}
+.spi.unseen span{color:var(--sub);font-weight:400}
+.recent{display:flex;flex-direction:column}
+.rc{display:flex;align-items:center;gap:10px;border:none;background:none;border-bottom:1px solid var(--line);padding:9px 0;text-align:left;color:inherit}
+.rc:last-child{border-bottom:none}
+.rc .d{flex:none;font-size:12px;color:var(--sub);min-width:7.5em}
+.rc .nm{flex:1;font-size:14px;font-weight:600}
+.rc .chev,.pr .pc{color:var(--sub)}
+.prefs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px}
+.pr{display:grid;grid-template-columns:3.6em 1fr 2.6em;align-items:center;gap:8px;border:none;background:none;padding:6px 0;color:inherit;font-size:13px;text-align:left}
+.pr .bar{height:8px;border-radius:4px;background:#dbe4ee;overflow:hidden}
+.pr .bar i{display:block;height:100%;background:var(--visited);border-radius:4px}
+.pr .pc{font-size:12px;text-align:right}
+.pr.v .pn{font-weight:700}
+.sec.flat{padding-bottom:4px}
 .list-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
 .list-item:hover{background:var(--bg)}
 .list-item .nm{font-weight:600;font-size:14px}
@@ -165,11 +200,13 @@ main{flex:1;position:relative;min-height:0;display:flex}
 
 @media (max-width:720px){
   .bar h1{font-size:15px}
-  .stats .wide{display:none}
+  .stats{display:none}
+  .bar{justify-content:space-between}
+  #search{flex:1 1 120px;min-width:0}
+  .sum-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prefs{grid-template-columns:1fr}
   /* iPhoneで入力欄をタップしたときに画面が勝手に拡大しないよう16px */
   #search,.rate textarea,.rate input[type=date],.visits input[type=date]{font-size:16px}
-  .list{padding-bottom:env(safe-area-inset-bottom,0px)}
-  .list{position:absolute;inset:0;width:auto;z-index:500;border:none}
   .sheet{left:0;right:0;top:auto;width:auto;height:78dvh;border-radius:16px 16px 0 0;transform:translateY(105%)}
   .sheet.open{transform:none}
   .sheet-grip{display:block;position:sticky;top:0;height:22px;margin-bottom:-22px;z-index:2;touch-action:none}

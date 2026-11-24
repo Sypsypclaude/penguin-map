@@ -20,14 +20,18 @@
 <header class="bar">
   <h1>🐧 ペンギンマップ</h1>
   <div class="stats" id="stats"></div>
-  <button class="btn ghost" id="listToggle" aria-pressed="false">一覧</button>
+  <nav class="tabs" role="tablist" aria-label="表示の切り替え">
+    <button role="tab" id="tabMap" aria-selected="true">地図</button>
+    <button role="tab" id="tabSum" aria-selected="false">サマリー</button>
+  </nav>
 </header>
 
 <div class="filters">
   <input id="search" type="search" placeholder="施設名・都道府県で検索" autocomplete="off">
+  <button class="sp-toggle" id="spToggle" aria-expanded="false" aria-controls="speciesChips">🐧 種類<span id="spCount"></span><span class="caret">▾</span></button>
   <label class="chk"><input type="checkbox" id="onlyVisited"> 行った所</label>
   <label class="chk"><input type="checkbox" id="onlyUnvisited"> 未訪問</label>
-  <div class="chips" id="speciesChips"></div>
+  <div class="chips" id="speciesChips" hidden></div>
 </div>
 
 <main>
