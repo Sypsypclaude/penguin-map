@@ -140,7 +140,13 @@ window.FACILITIES = [
   "lat": 42.341,
   "lng": 140.947,
   "address": "北海道 室蘭市 祝津町",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR室蘭駅から道南バス「みたら・水族館前」下車",
+   "car": "道央道 室蘭ICから約10分・無料駐車場",
+   "src": "https://www.visit-hokkaido.jp/spot/detail_13134.html"
+  },
+  "note": "夏季のみの営業（例年4月下旬〜10月中旬）"
  },
  {
   "name": "青森県営浅虫水族館",
@@ -260,7 +266,12 @@ window.FACILITIES = [
   "url": "http://tohoku-safaripark.co.jp/",
   "lat": 37.64216,
   "lng": 140.36335,
-  "address": "福島県 二本松市 沢松倉"
+  "address": "福島県 二本松市 沢松倉",
+  "access": {
+   "train": "JR二本松駅から福島交通バス（塩沢温泉行き）約30分「東北サファリパーク前」",
+   "car": "東北道 二本松ICから約15分・無料駐車場",
+   "src": "https://rurubu.jp/andmore/spot/80005474"
+  }
  },
  {
   "name": "新潟市水族館マリンピア日本海",
@@ -306,7 +317,12 @@ window.FACILITIES = [
   "lat": 37.63386,
   "lng": 138.76027,
   "address": "新潟県 長岡市",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR寺泊駅からバス約10分「水族博物館前」下車すぐ",
+   "car": "北陸道 中之島見附ICから約25〜35分・無料駐車場",
+   "src": "https://niigata-kankou.or.jp/spot/detail_5832.html"
+  }
  },
  {
   "name": "富山市ファミリーパーク",
@@ -352,7 +368,12 @@ window.FACILITIES = [
   "url": "https://www.uozu-aquarium.jp/",
   "lat": 36.79831,
   "lng": 137.38812,
-  "address": "富山県 魚津市"
+  "address": "富山県 魚津市",
+  "access": {
+   "train": "魚津駅西口から市民バス「のらんマイ・カー」約20分「水族館前」",
+   "car": "北陸道 魚津ICから約15分・無料駐車場",
+   "src": "https://rurubu.jp/andmore/spot/80015847"
+  }
  },
  {
   "name": "いしかわ動物園",
@@ -364,7 +385,12 @@ window.FACILITIES = [
   "url": "https://www.ishikawazoo.jp/",
   "lat": 36.43331,
   "lng": 136.54618,
-  "address": "石川県 能美市 徳山町"
+  "address": "石川県 能美市 徳山町",
+  "access": {
+   "train": "金沢駅東口10番のりばから北陸鉄道バス約60分「いしかわ動物園」",
+   "car": "北陸道 小松IC・美川IC・能美根上スマートICから約20分",
+   "src": "https://www.mapple.net/sp_spot/479951/"
+  }
  },
  {
   "name": "のとじま水族館",
@@ -431,7 +457,12 @@ window.FACILITIES = [
   "lat": 36.32592,
   "lng": 138.41825,
   "address": "長野県 小諸市 古城二丁目",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR・しなの鉄道「小諸」駅から徒歩約3分（懐古園内）",
+   "car": "上信越道 小諸ICから約5分",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_12887.html"
+  }
  },
  {
   "name": "須坂市動物園",
@@ -460,7 +491,12 @@ window.FACILITIES = [
   "url": "https://iidazoo.jp/",
   "lat": 35.51393,
   "lng": 137.82396,
-  "address": "長野県 飯田市 橋南 扇町 銀座五丁目"
+  "address": "長野県 飯田市 橋南 扇町 銀座五丁目",
+  "access": {
+   "train": "JR飯田線「飯田」駅から徒歩約10〜15分",
+   "car": "中央道 飯田ICから約15分",
+   "src": "https://summer.walkerplus.com/odekake/detail/ar0420s14706/map.html"
+  }
  },
  {
   "name": "静岡市立日本平動物園",
@@ -472,7 +508,12 @@ window.FACILITIES = [
   "url": "https://www.nhdzoo.jp/",
   "lat": 34.97982,
   "lng": 138.44051,
-  "address": "静岡県 静岡市 駿河区 池田"
+  "address": "静岡県 静岡市 駿河区 池田",
+  "access": {
+   "train": "JR東静岡駅からしずてつバス約10分「日本平動物園」",
+   "car": "東名 日本平久能山スマートIC・静岡ICから",
+   "src": "https://www.city.shizuoka.lg.jp/s5984/s005533.html"
+  }
  },
  {
   "name": "浜松市動物園",
@@ -500,7 +541,12 @@ window.FACILITIES = [
   "url": "https://k-hana-tori.com/",
   "lat": 34.76169,
   "lng": 138.01538,
-  "address": "静岡県 掛川市 南郷 上張 南二丁目"
+  "address": "静岡県 掛川市 南郷 上張 南二丁目",
+  "access": {
+   "train": "JR掛川駅南口から徒歩約15分（約800m）",
+   "car": "東名 掛川ICから約5分・無料駐車場",
+   "src": "https://rurubu.jp/andmore/spot/80022549"
+  }
  },
  {
   "name": "富士花鳥園",
@@ -661,7 +707,12 @@ window.FACILITIES = [
   "url": "https://aquarium.co.jp/",
   "lat": 34.48201,
   "lng": 136.84533,
-  "address": "三重県 鳥羽市"
+  "address": "三重県 鳥羽市",
+  "access": {
+   "train": "JR・近鉄「鳥羽」駅から徒歩約10分",
+   "car": "伊勢道 伊勢ICから伊勢二見鳥羽ライン経由",
+   "src": "https://www.walkerplus.com/spot/ar0624s03767/map.html"
+  }
  },
  {
   "name": "伊勢シーパラダイス",
@@ -760,7 +811,12 @@ window.FACILITIES = [
   "url": "https://sunshinecity.jp/aquarium/",
   "lat": 35.7289,
   "lng": 139.7197,
-  "address": "東京都 豊島区 東池袋"
+  "address": "東京都 豊島区 東池袋",
+  "access": {
+   "train": "東京メトロ有楽町線「東池袋」駅から徒歩約5分／池袋駅から徒歩約10分",
+   "car": "首都高5号線 東池袋出入口直結",
+   "src": "https://www.walkerplus.com/spot/ar0313s03755/map.html"
+  }
  },
  {
   "name": "しながわ水族館",
@@ -772,7 +828,11 @@ window.FACILITIES = [
   "url": "https://www.aquarium.gr.jp/",
   "lat": 35.59,
   "lng": 139.736,
-  "address": "東京都 品川区 勝島（しながわ区民公園内）"
+  "address": "東京都 品川区 勝島（しながわ区民公園内）",
+  "access": {
+   "train": "京急「大森海岸」駅から徒歩8分／JR大森駅北口から徒歩15分",
+   "src": "https://www.walkerplus.com/spot/ar0313s03758/map.html"
+  }
  },
  {
   "name": "アクアパーク品川",
@@ -820,7 +880,12 @@ window.FACILITIES = [
   "lat": 35.54956,
   "lng": 139.66497,
   "address": "神奈川県 川崎市 幸区 南加瀬",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR「新川崎」駅から徒歩約15分",
+   "car": "駐車場は19台のみ（公共交通がおすすめ）",
+   "src": "https://www.city.kawasaki.jp/shisetsu/category/30-26-4-0-0-0-0-0-0-0.html"
+  }
  },
  {
   "name": "横浜市立野毛山動物園",
@@ -1080,7 +1145,12 @@ window.FACILITIES = [
   "url": "https://www.nasu-oukoku.com/",
   "lat": 37.13205,
   "lng": 140.04041,
-  "address": "栃木県 那須郡 那須町 大島 大谷"
+  "address": "栃木県 那須郡 那須町 大島 大谷",
+  "access": {
+   "train": "JR那須塩原駅から無料シャトルバス（予約制）約50分",
+   "car": "東北道 那須ICから約30分",
+   "src": "https://kids.rurubu.jp/article/225/"
+  }
  },
  {
   "name": "桐生が岡動物園",
@@ -1092,7 +1162,12 @@ window.FACILITIES = [
   "url": "https://www.city.kiryu.lg.jp/zoo/index.html",
   "lat": 36.42062,
   "lng": 139.33976,
-  "address": "群馬県 桐生市 天神町二丁目"
+  "address": "群馬県 桐生市 天神町二丁目",
+  "access": {
+   "train": "上毛電鉄「西桐生」駅から徒歩約15分／JR桐生駅から徒歩約20分",
+   "car": "北関東道 太田藪塚ICから約20〜30分・無料駐車場",
+   "src": "https://rurubu.jp/andmore/spot/80007654"
+  }
  },
  {
   "name": "群馬サファリパーク",
@@ -1120,7 +1195,12 @@ window.FACILITIES = [
   "url": "https://www5.city.kyoto.jp/zoo/",
   "lat": 35.01303,
   "lng": 135.78631,
-  "address": "京都府 京都市 左京区 永観堂町飛地 南禅寺草川町"
+  "address": "京都府 京都市 左京区 永観堂町飛地 南禅寺草川町",
+  "access": {
+   "train": "地下鉄東西線「蹴上」駅1番出口から徒歩約7分",
+   "car": "専用駐車場なし（岡崎公園駐車場など）",
+   "src": "https://rurubu.jp/andmore/spot/80026270"
+  }
  },
  {
   "name": "京都水族館",
@@ -1138,19 +1218,6 @@ window.FACILITIES = [
    "car": "専用駐車場なし",
    "src": "https://www.kyoto-aquarium.com/about/access/"
   }
- },
- {
-  "name": "丹後魚っ知館",
-  "pref": "京都府",
-  "type": "水族館",
-  "species": [
-   "magellanic"
-  ],
-  "url": "https://www.google.com/search?q=%E4%B8%B9%E5%BE%8C%E9%AD%9A%E3%81%A3%E7%9F%A5%E9%A4%A8%20%E5%85%AC%E5%BC%8F%E3%82%B5%E3%82%A4%E3%83%88",
-  "lat": 35.5735,
-  "lng": 135.199,
-  "address": "京都府 宮津市 小田宿野",
-  "urlIsSearch": true
  },
  {
   "name": "天王寺動物園",
@@ -1216,7 +1283,12 @@ window.FACILITIES = [
   "url": "https://www.kobe-ojizoo.jp/",
   "lat": 34.71073,
   "lng": 135.21423,
-  "address": "兵庫県 神戸市 灘区 原田通三丁目 ミュージアムロード"
+  "address": "兵庫県 神戸市 灘区 原田通三丁目 ミュージアムロード",
+  "access": {
+   "train": "阪急「王子公園」駅西口から徒歩3分／JR灘駅から徒歩5分",
+   "car": "阪神高速 摩耶出入口から約10分",
+   "src": "https://rurubu.jp/andmore/spot/80029146"
+  }
  },
  {
   "name": "姫路セントラルパーク",
@@ -1280,7 +1352,12 @@ window.FACILITIES = [
   "url": "https://www.city.himeji.lg.jp/aqua/",
   "lat": 34.82266,
   "lng": 134.67634,
-  "address": "兵庫県 姫路市 福沢町 延末一丁目"
+  "address": "兵庫県 姫路市 福沢町 延末一丁目",
+  "access": {
+   "train": "JR姫路駅南口から神姫バス「姫路市文化センター前」下車、徒歩5分／山陽電車「手柄」駅から徒歩約10分",
+   "car": "姫路バイパス 中地ICから約5分（手柄山駐車場）",
+   "src": "https://rurubu.jp/andmore/spot/80029881"
+  }
  },
  {
   "name": "AQUARIUM × ART átoa",
@@ -1382,7 +1459,12 @@ window.FACILITIES = [
   "url": "https://www.fukuyamazoo.jp/",
   "lat": 34.52369,
   "lng": 133.27921,
-  "address": "広島県 福山市"
+  "address": "広島県 福山市",
+  "access": {
+   "train": "JR福山駅前からバスで「山守」、乗り換えて「動物園前」",
+   "car": "山陽道 福山東IC・福山西ICから約30分・無料駐車場",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_12856.html"
+  }
  },
  {
   "name": "宮島水族館",
@@ -1394,7 +1476,13 @@ window.FACILITIES = [
   "url": "https://www.miyajima-aqua.jp/",
   "lat": 34.29548,
   "lng": 132.31565,
-  "address": "広島県 廿日市市 宮島町 弥山登山道 大元ルート"
+  "address": "広島県 廿日市市 宮島町 弥山登山道 大元ルート",
+  "access": {
+   "train": "宮島口からフェリーで宮島桟橋、徒歩約25分",
+   "car": "専用駐車場なし（宮島口に車を置いてフェリー）",
+   "src": "https://www.walkerplus.com/spot/ar0834s16391/"
+  },
+  "note": "2026年12月1日〜2027年3月31日は施設工事のため休館予定"
  },
  {
   "name": "松江フォーゲルパーク",
@@ -1441,7 +1529,12 @@ window.FACILITIES = [
   "url": "https://tokuyama-zoo.jp/",
   "lat": 34.06207,
   "lng": 131.8158,
-  "address": "山口県 周南市 東金剛山 蓮ヶ浴 岐南町"
+  "address": "山口県 周南市 東金剛山 蓮ヶ浴 岐南町",
+  "access": {
+   "train": "JR徳山駅から徒歩約20分、または防長バス「動物園文化会館入口」",
+   "car": "山陽道 徳山東ICから約10分",
+   "src": "https://rurubu.jp/andmore/spot/80035349"
+  }
  },
  {
   "name": "下関市立しものせき水族館 海響館",
@@ -1476,7 +1569,12 @@ window.FACILITIES = [
   "lat": 34.01486,
   "lng": 134.52179,
   "address": "徳島県 徳島市 渋野町",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR徳島駅前から徳島市バス「丈六寺南」行き約25分「とくしま動物園前」",
+   "car": "国道11号経由・駐車場あり（有料）",
+   "src": "https://sp.jorudan.co.jp/zoo_aqua/spot_3115.html"
+  }
  },
  {
   "name": "新屋島水族館",
@@ -1488,7 +1586,13 @@ window.FACILITIES = [
   "url": "https://r.goope.jp/new-yashima-aq/",
   "lat": 34.35807,
   "lng": 134.09971,
-  "address": "香川県 高松市 屋島東町"
+  "address": "香川県 高松市 屋島東町",
+  "access": {
+   "train": "JR屋島駅・琴電屋島駅から屋島山上シャトルバス",
+   "car": "高松道 高松中央ICから約20分（屋島ドライブウェイ）",
+   "src": "https://www.walkerplus.com/spot/ar0937s16394/map.html"
+  },
+  "note": "リニューアルのため休館中（2027年春に再開予定）"
  },
  {
   "name": "四国水族館",
@@ -1517,7 +1621,12 @@ window.FACILITIES = [
   "url": "https://www.tobezoo.com/",
   "lat": 33.76237,
   "lng": 132.79281,
-  "address": "愛媛県 伊予郡 砥部町 上原町"
+  "address": "愛媛県 伊予郡 砥部町 上原町",
+  "access": {
+   "train": "伊予鉄松山市駅から伊予鉄バス砥部線「とべ動物園前」すぐ（約35分）",
+   "car": "松山ICから国道33号を南へ約10分",
+   "src": "https://rurubu.jp/andmore/spot/80036970"
+  }
  },
  {
   "name": "虹の森公園おさかな館",
@@ -1530,7 +1639,12 @@ window.FACILITIES = [
   "lat": 33.221,
   "lng": 132.716,
   "address": "愛媛県 北宇和郡 松野町 延野々",
-  "urlIsSearch": true
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR予土線「松丸」駅から徒歩約3分",
+   "car": "松山道 三間ICから約20分・無料駐車場",
+   "src": "https://www.walkerplus.com/spot/ar0938s16395/"
+  }
  },
  {
   "name": "高知県立のいち動物公園",
@@ -1577,7 +1691,12 @@ window.FACILITIES = [
   "url": "https://zoo.city.fukuoka.lg.jp/",
   "lat": 33.57324,
   "lng": 130.38981,
-  "address": "福岡県 福岡市 中央区 南公園 桜坂三丁目"
+  "address": "福岡県 福岡市 中央区 南公園 桜坂三丁目",
+  "access": {
+   "train": "地下鉄「薬院大通」駅2番出口から西鉄バス約6分「動物園前」",
+   "car": "土日祝は駐車場が混雑（公共交通がおすすめ）",
+   "src": "https://www.walkerplus.com/spot/ar1040s03806/data.html"
+  }
  },
  {
   "name": "久留米市鳥類センター",
@@ -1681,7 +1800,12 @@ window.FACILITIES = [
   "url": "https://www.cuddly.co.jp/",
   "lat": 32.93175,
   "lng": 131.06701,
-  "address": "熊本県 阿蘇市 蔵原"
+  "address": "熊本県 阿蘇市 蔵原",
+  "access": {
+   "train": "JR阿蘇駅からタクシー約3分／徒歩約20分",
+   "car": "九州道 熊本ICから国道57号経由 約45〜55分・無料駐車場",
+   "src": "https://rurubu.jp/andmore/spot/80040144"
+  }
  },
  {
   "name": "別府ラクテンチ",
@@ -1693,7 +1817,12 @@ window.FACILITIES = [
   "url": "https://rakutenchi.jp/",
   "lat": 33.284,
   "lng": 131.485,
-  "address": "大分県 別府市 流川通り"
+  "address": "大分県 別府市 流川通り",
+  "access": {
+   "train": "JR別府駅東口から亀の井バス約15〜20分「ラクテンチ」（入口からケーブルカー）",
+   "car": "大分道 別府ICから約10分",
+   "src": "https://www.walkerplus.com/spot/ar1044s14616/data.html"
+  }
  },
  {
   "name": "大分マリーンパレス水族館 うみたまご",
@@ -1738,7 +1867,12 @@ window.FACILITIES = [
   "url": "http://www.miyazaki-city-zoo.jp/",
   "lat": 31.9845,
   "lng": 131.466,
-  "address": "宮崎県 宮崎市 塩路"
+  "address": "宮崎県 宮崎市 塩路",
+  "access": {
+   "train": "JR宮崎駅から宮崎交通バス約30〜40分「フェニックス自然動物園」",
+   "car": "宮崎道 宮崎ICから一ツ葉有料道路経由 約20分",
+   "src": "https://rurubu.jp/andmore/spot/80041253"
+  }
  },
  {
   "name": "鹿児島市平川動物公園",
@@ -1759,16 +1893,21 @@ window.FACILITIES = [
  },
  {
   "name": "志布志湾大黒イルカランド",
-  "pref": "鹿児島県",
+  "pref": "宮崎県",
   "type": "水族館",
   "species": [
    "humboldt"
   ],
   "url": "https://www.google.com/search?q=%E5%BF%97%E5%B8%83%E5%BF%97%E6%B9%BE%E5%A4%A7%E9%BB%92%E3%82%A4%E3%83%AB%E3%82%AB%E3%83%A9%E3%83%B3%E3%83%89%20%E5%85%AC%E5%BC%8F%E3%82%B5%E3%82%A4%E3%83%88",
-  "lat": 31.442,
-  "lng": 131.08,
-  "address": "鹿児島県 肝属郡 東串良町 柏原",
-  "urlIsSearch": true
+  "lat": 31.4624,
+  "lng": 131.1737,
+  "address": "宮崎県 串間市 高松",
+  "urlIsSearch": true,
+  "access": {
+   "train": "JR日南線「福島高松」駅から徒歩約20〜30分",
+   "car": "東九州道 曽於弥五郎ICから約40分・駐車場あり",
+   "src": "https://rurubu.jp/andmore/spot/80041465"
+  }
  },
  {
   "name": "DMMかりゆし水族館",

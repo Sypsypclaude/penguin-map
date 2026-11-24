@@ -191,7 +191,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 アクセス情報）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 アクセス全施設）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
@@ -324,7 +324,7 @@
         ${f.access?.car ? `<div class="acc-row"><span class="acc-k">車</span><span>${esc(f.access.car)}</span></div>` : ""}
         ${f.access?.train || f.access?.car ? "" : `<p class="note">公式サイトでアクセス方法を確認してください。</p>`}
         <a class="btn route" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(f.name + " " + f.pref)}" target="_blank" rel="noopener">現在地からの経路 ↗</a>
-        ${f.access?.src ? `<p class="note">出典：<a href="${esc(f.access.src)}" target="_blank" rel="noopener">公式サイトのアクセス案内</a>（2026年11月時点）</p>` : ""}
+        ${f.access?.src ? `<p class="note">出典：<a href="${esc(f.access.src)}" target="_blank" rel="noopener">アクセス案内</a>（2026年11月時点。最新はお出かけ前に公式サイトで）</p>` : ""}
       </div>
 
       <div class="sec rate">
