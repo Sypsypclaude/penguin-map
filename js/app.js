@@ -241,8 +241,27 @@
   FAC.forEach(f => {
     if (f.lat == null) return;
     const m = L.marker([f.lat, f.lng], { icon: iconFor(f), title: f.name, fac: f })
-            .on("click", () => openSheet(f));
+            .on("click", () => tapFacility(f, m));
     markers.set(f, m);
+  });
+
+  // 施設のピンをタップ：ラベルが出ていない縮尺では、1回目は吹き出し（名前・市町村）だけ。
+  // 同じピンをもう一度タップしたら詳細を開く。ラベルが出ている縮尺ではすぐ詳細を開く。
+  let tappedFac = null;
+  function tapFacility(f, m) {
+    if (map.getZoom() >= LABEL_ZOOM || tappedFac === f) { tappedFac = null; m.closeTooltip(); openSheet(f); return; }
+    markers.forEach(x => { if (x !== m) x.closeTooltip(); });
+    tappedFac = f;
+    const hint = tipHtml(f) + '<span class="tip-hint">もう一度タップで詳細 ›</span>';
+    if (!m.getTooltip()) m.bindTooltip(hint, { className: "tip", direction: "top", offset: [0, -16] });
+    else m.setTooltipContent(hint);
+    m.openTooltip();
+  }
+  map.on("click zoomstart", () => {
+    if (!tappedFac) return;
+    const m = markers.get(tappedFac);
+    if (m?.getTooltip()) { m.closeTooltip(); m.setTooltipContent(tipHtml(tappedFac)); }
+    tappedFac = null;
   });
 
   // ---- フィルター ----
@@ -318,7 +337,7 @@
         <div class="nm">${esc(f.name)}${r.stars ? ` <span style="color:var(--star)">${"★".repeat(r.stars)}</span>` : ""}</div>
         <div class="meta">${esc(f.type)}・${f.species.map(s => esc(SP[s].ja.replace(/ペンギン.*/, ""))).join("／")}</div></div></div>`;
     }
-    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 スワイプで閉じる）<br>
+    html += `<div class="sec note">記録はこのブラウザに保存されます。（アプリの版：2026-11-24 施設は2回タップで詳細）<br>
       <button class="btn" id="exportBtn">記録を書き出す</button> <button class="btn" id="importBtn">読み込む</button></div>`;
     const list = $("#list"); list.innerHTML = html;
     list.querySelectorAll(".list-item").forEach(el => el.onclick = () => {
